@@ -2,6 +2,11 @@ def import_country_data(filename):
     import cairocffi
     import pandas as pd
     import requests
+    import tomllib
+
+    with open(".streamlit/secrets.toml", "rb") as f:
+        config = tomllib.load(f)
+    print(config['api_key'])
 
     country_data = pd.read_csv('countries.csv')
 
@@ -22,7 +27,7 @@ def import_country_data(filename):
         print(country)
         country_ISO2 = country_data.loc[country,'ISO2']
         api_url = 'https://api.api-ninjas.com/v1/countryflag?country={}'.format(country_ISO2)
-        response = requests.get(api_url, headers={'X-Api-Key': 'ZxkzgHSGXIxBR9x9M8teMFWHjVhCcuXGkZzD0Nax'})
+        response = requests.get(api_url, headers={'X-Api-Key': config['api_key']})
         if response.status_code == requests.codes.ok:
             res = response.json()
             if res:
@@ -31,7 +36,7 @@ def import_country_data(filename):
             print("Error:", response.status_code, response.text)
 
         api_url = 'https://api.api-ninjas.com/v1/country?name={}'.format(country)
-        response = requests.get(api_url, headers={'X-Api-Key': 'ZxkzgHSGXIxBR9x9M8teMFWHjVhCcuXGkZzD0Nax'})
+        response = requests.get(api_url, headers={'X-Api-Key': config['api_key']})
 
         if response.status_code == requests.codes.ok:
             res = response.json()
