@@ -5,8 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ba42b1f4-d115-402a-8536-29db4a50ec6d" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/DataAlalysis.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/DataAlalysis.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Country_Analysis.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Country_Analysis.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -23,10 +25,10 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 8,
-  "fromUser": false
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 8,
+  &quot;fromUser&quot;: false
+}</component>
   <component name="ProjectId" id="3IffKuA8Dzj9LLWyDX7yEwdZqj5" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -41,9 +43,10 @@
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "codeWithMe.voiceChat.enabledByDefault": "false",
     "git-widget-placeholder": "main",
-    "last_opened_file_path": "C:/Users/ruban/Desktop/AI/projects/DataAlalysis",
+    "last_opened_file_path": "/Users/arielrubanenko/Documents/GitHub/DataAlalysisProject",
     "node.js.detected.package.jshint": "true",
-    "node.js.selected.package.jshint": ""
+    "node.js.selected.package.jshint": "",
+    "settings.editor.selected.configurable": "jupyter.general.settings"
   }
 }]]></component>
   <component name="RecentsManager">
