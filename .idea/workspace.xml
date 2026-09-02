@@ -4,9 +4,9 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ba42b1f4-d115-402a-8536-29db4a50ec6d" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
+    <list default="true" id="ba42b1f4-d115-402a-8536-29db4a50ec6d" name="Changes" comment="set the api key as secret. and load it from secrets.toml file which is not on git">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Country_Analysis.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Country_Analysis.ipynb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -17,12 +17,25 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Python Script" />
+        <option value="Jupyter Notebook" />
       </list>
     </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "Ariel14061969"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/Ariel14061969/DataAlalysis.git",
+    "accountId": "bdae2c41-0fb0-481d-b6f8-3aef18d295e5"
+  }
+}]]></component>
   <component name="ProjectColorInfo"><![CDATA[{
   "associatedIndex": 8,
   "fromUser": false
@@ -97,8 +110,33 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1788160482896</updated>
-      <workItem from="1788160483949" duration="17186000" />
+      <workItem from="1788160483949" duration="45522000" />
     </task>
+    <task id="LOCAL-00001" summary="add pyproject.toml file">
+      <option name="closed" value="true" />
+      <created>1788244067529</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1788244067529</updated>
+    </task>
+    <task id="LOCAL-00002" summary="set the api key as secret. and load it from secrets.toml file which is not on git">
+      <option name="closed" value="true" />
+      <created>1788245570828</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1788245570829</updated>
+    </task>
+    <task id="LOCAL-00003" summary="set the api key as secret. and load it from secrets.toml file which is not on git">
+      <option name="closed" value="true" />
+      <created>1788277515241</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1788277515241</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -115,14 +153,29 @@
       </map>
     </option>
   </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="add pyproject.toml file" />
+    <MESSAGE value="set the api key as secret. and load it from secrets.toml file which is not on git" />
+    <option name="LAST_COMMIT_MESSAGE" value="set the api key as secret. and load it from secrets.toml file which is not on git" />
+  </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <condition expression="country_ISO2==&quot;NM&quot;" language="Python" />
           <url>file://$PROJECT_DIR$/import_country_data.py</url>
-          <line>26</line>
+          <line>31</line>
           <option name="timeStamp" value="13" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/import_country_data.py</url>
+          <line>10</line>
+          <option name="timeStamp" value="17" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/import_country_data.py</url>
+          <line>38</line>
+          <option name="timeStamp" value="18" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
