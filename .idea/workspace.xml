@@ -6,7 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="ba42b1f4-d115-402a-8536-29db4a50ec6d" name="Changes" comment="set the api key as secret. and load it from secrets.toml file which is not on git">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Country_Analysis.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Country_Analysis.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -110,7 +110,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1788160482896</updated>
-      <workItem from="1788160483949" duration="45522000" />
+      <workItem from="1788160483949" duration="45845000" />
     </task>
     <task id="LOCAL-00001" summary="add pyproject.toml file">
       <option name="closed" value="true" />
@@ -136,7 +136,15 @@
       <option name="project" value="LOCAL" />
       <updated>1788277515241</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="set the api key as secret. and load it from secrets.toml file which is not on git">
+      <option name="closed" value="true" />
+      <created>1788358874435</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1788358874436</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

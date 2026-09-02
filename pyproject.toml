@@ -1,2 +1,6 @@
 [tool.poetry]
 package-mode = false
+[tool.poetry.dependencies]
+python = ">=3.11"
+seaborn = "^0.13.2"
+ipkernel = "^7.3.0"
