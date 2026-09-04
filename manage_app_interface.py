@@ -65,17 +65,34 @@ def st_ui_start():
         out_filename = 'country_with_data.csv'
         st.write(f"<span style='color: white; font-weight: bold;'>Creating new database, please wait...</span>",
                  unsafe_allow_html=True)
-        import_country_data(out_filename)
-        country_data_orig = pd.read_csv('country_with_data.csv')
+        try:
+            import_country_data(out_filename)
+            country_data_orig = pd.read_csv('country_with_data.csv')
+            st.write(f"<span style='color: white; font-weight: bold;'>Finished loading and reading new data</span>",
+                     unsafe_allow_html=True)
+
+        except Exception as e:
+            st.write(f"<span style='color: white; font-weight: bold;'>Failed to load new data:{e}</span>",
+                     unsafe_allow_html=True)
+            quit()
+
         country_data_pre_process = country_data_orig.copy()
         country_data = process_new_data(country_data_pre_process)
         return country_data, 'new'
 
     else:
-        country_data_orig = pd.read_csv('country_with_data.csv')
-        country_data = country_data_orig.copy()
-        st.write(
-            f"<span style='color: white; font-weight: bold;'>Current database read successfully</span>", unsafe_allow_html=True)
+        try:
+            country_data_orig = pd.read_csv('country_with_data.csv')
+            st.write(
+            f"<span style='color: white; font-weight: bold;'>Finished loading and reading current data</span>", unsafe_allow_html=True)
+
+        except Exception as e:
+            st.write(f"<span style='color: white; font-weight: bold;'>Failed to load current data:{e}</span>",
+                    unsafe_allow_html=True)
+            quit()
+
+        country_data_pre_process = country_data_orig.copy()
+        country_data = process_new_data(country_data_pre_process)
         return country_data, 'current'
 
 #-----------End of Function validate_data_source_select-----------#
