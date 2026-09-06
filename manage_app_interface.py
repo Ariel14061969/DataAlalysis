@@ -42,7 +42,7 @@ def validate_data_source_select():
 #         5. A dictionary that holds each of the numeric column names          #
 #            as key and the percentage of empty cells in each column           #
 #------------------------------------------------------------------------------#
-def st_ui_start():
+def st_ui_start(row_dropna_threshold_factor = 0.9):
     st.markdown(
         "<h3 style='text-align: left; color: white; font-weight: bold;'>MyCountry - The World In Your Hands</h2>",
         unsafe_allow_html=True)
@@ -84,8 +84,8 @@ def st_ui_start():
             quit()
 
         country_data_pre_process = country_data_orig.copy()
-        country_data = process_new_data(country_data_pre_process)
-        return country_data, 'new'
+        country_data, country_column_data, country_columns_nan_percentage, country_geo_data  = process_new_data(country_data_pre_process, row_dropna_threshold_factor)
+        return country_data, country_column_data, country_columns_nan_percentage, country_geo_data, 'new'
 
     else:
         try:
@@ -99,14 +99,8 @@ def st_ui_start():
             quit()
 
         country_data_pre_process = country_data_orig.copy()
-        country_all_columns = list() # A list of all columns in the DataFrame
-        country_numeric_columns = list() # A list of all columns in the DataFrame that hold numerical values
-        country_non_numeric_columns = list() # A list of all columns in the DataFrame that hold non-numerical values
-        country_columns_nan_percentage = dict() # A dictionary that holds each of the numeric column names as a key
-                                                # and the percentage of empty cells in each column as the value of that key
-
-        country_data, country_all_columns, country_numeric_columns, country_non_numeric_columns, country_columns_nan_percentage  = process_new_data(country_data_pre_process)
-        return country_data, country_all_columns, country_numeric_columns, country_non_numeric_columns, country_columns_nan_percentage, 'current'
+        country_data, country_column_data, country_columns_nan_percentage, country_geo_data  = process_new_data(country_data_pre_process, row_dropna_threshold_factor)
+        return country_data, country_column_data, country_columns_nan_percentage, country_geo_data, 'current'
 
 #-----------End of Function validate_data_source_select-----------#
 
@@ -129,18 +123,17 @@ def st_ui_start():
 #           5. A dictionary that holds each of the numeric column names     #
 #              as key and the percentage of empty cells in each column      #
 #---------------------------------------------------------------------------#
-def process_new_data(datain):
+def process_new_data(datain, row_dropna_threshold_factor = 0.9):
     # Open a log file for debug and review
     with open('country_data_anlyze_and_process_log.txt', 'w') as log_file:
         log_file.write(f'Log opened at: {dt.datetime.now(zi.ZoneInfo("Asia/Jerusalem")).strftime("%Y-%m-%d %H:%M:%S")}\n')
         log_file.write(f'Starting Analysis and Processing...\n')
 
-    # ---------------------- Removing Duplicates on the 'Country' Column----------------------------#
+    # ---------------------- Remove Duplicates on the 'Country' Column----------------------------#
         length_orig = len(datain)
         datain.drop_duplicates(subset='Country', keep='first', inplace=True)
         length_post_duplicates_removal = len(datain)
         delta_length = length_orig - length_post_duplicates_removal
-
         log_file.write(f"\n#------Handling Duplicates on the 'Country' column----#\n")
         log_file.write(f'Original length of dataset was {length_orig}\n')
         log_file.write(f'Length of dataset after removal of duplicates is {length_post_duplicates_removal}\n')
@@ -148,22 +141,23 @@ def process_new_data(datain):
         log_file.write(f'\n#-----------------------------------------------------------------------------------#\n')
     # ------------------------------End of Duplicate removal----------------------------------------#
 
-    # ------------------------Changing index to Country and analyzing------------------------------#
+    # ------------------------Change index to Country before starting the analysis----------------#
         datain.set_index('Country', inplace=True)
     # -----------------------------------End of Index replacement-----------------------------------#
 
-    # -----------------------Profiling the Dataset and handling empty cells-------------------------#
-        # Assigning all columns in the DataFrame to a list
+    # -----------------------Examine the Dataset and handle empty cells-------------------------#
+        # Assign all countries and columns in the original dataset to lists
+        country_list_pre_drop = list(datain.index)
         country_column_list = list(datain.columns)
 
         # Split the column list to a list of columns with numeric values and a list of columns with non-numeric values
         possible_numeric_dtype_vals = ['float32', 'float64', 'int64', 'int32', 'unit32', 'int16', 'uint16', 'int8', 'uint8']
         numeric_column_list = list(datain.dtypes[datain.dtypes.astype(str).isin(possible_numeric_dtype_vals)].index)
         non_numeric_column_list = [column_name for column_name in country_column_list if column_name not in numeric_column_list]
-
         log_file.write(f"\n#------Splitting the column list to numeric and non-numeric---------------#\n")
         log_file.write(f'\nThere are {len(numeric_column_list)} numeric columns in the dataset\n')
         log_file.write(f'There are {len(non_numeric_column_list)} non-numeric columns in the dataset\n')
+
         log_file.write(f'\n#-------List of numeric columns ---------#\n')
         for num_column_name in numeric_column_list:
             log_file.write(f'{num_column_name}\n')
@@ -171,38 +165,78 @@ def process_new_data(datain):
         log_file.write(f'\n#-------List of non-numeric columns ---------#\n')
         for non_num_column_name in non_numeric_column_list:
             log_file.write(f'{non_num_column_name}\n')
-
         log_file.write(f'#-----------------------------------------------------------------------#\n')
 
         # Define the max allowed empty cells in a row and remove all rows beyond that number
-        # Total numeric rows: 32
-        row_na_removal_threshold = 0.9  # Min required percentage of non-empty cells in a row (checked over the numeric columns of the dataset )
+        row_na_removal_threshold = row_dropna_threshold_factor  # Min required percentage of non-empty cells in a row
         datain.dropna(subset=numeric_column_list,thresh=math.ceil((len(numeric_column_list) * row_na_removal_threshold)),inplace=True)
+
+        # Identify which countries remained and which were removed from the original dataset
+        country_list_post_drop = list(datain.index)
+        removed_countries = [country for country in country_list_pre_drop if country not in country_list_post_drop]
 
         # Check how many rows were removed and report in the log
         length_post_NA_rows_removal = len(datain)
         delta_length_post_NA_removal = length_post_duplicates_removal - length_post_NA_rows_removal
-        log_file.write(f"\n#------Report how many rows (countries) were removed----------------------#\n")
+        log_file.write(f"\n#------Report the number of removed rows (countries) ----------------------#\n")
         log_file.write(f'Original length of dataset before removal of NA rows was {length_post_duplicates_removal}\n')
         log_file.write(f'Length of dataset after removal of NA rows is {length_post_NA_rows_removal}\n')
         log_file.write(f"Total of {delta_length_post_NA_removal} rows with more than {int(math.ceil((1 - row_na_removal_threshold) * 100))}% empty cells on the numerical columns of the dataset were identified and removed from the dataset ")
+
+        log_file.write(f'\nThe following countries were removed from the original list following the drop of rows described above:\n')
+        for country in removed_countries:
+            log_file.write(f'{country}\n')
         log_file.write(f'\n#-----------------------------------------------------------------------#\n')
 
-        # Identify the percentage of empty cells in each numeric columns
-        # Create a dictionaly and a single row DataFrame containing this information
-        columns_nan_percentage = dict()
+        # Identify the percentage of empty cells in each numeric columns and create a dictionaly to hold the data
+        country_columns_nan_percentage = dict()
         for column_name in numeric_column_list:
-            columns_nan_percentage[column_name] = round((1 - float(datain[column_name].count() / len(datain))) * 100, 1)
-
+            country_columns_nan_percentage[column_name] = round((1 - float(datain[column_name].count() / len(datain))) * 100, 1)
 
         log_file.write(f'\n#-------List of nan_percentage per column ---------#\n')
-        for key in columns_nan_percentage:
-            log_file.write(f'{key}: {columns_nan_percentage[key]}\n')
-
+        for key in country_columns_nan_percentage:
+            log_file.write(f'{key}: {country_columns_nan_percentage[key]}\n')
         log_file.write(f'#----------------------------------------------------:\n')
+
+        # Identify the number and names of continents in the dataset
+        continents_list = list(datain.Continent.unique())
+        num_of_continents = datain.Continent.nunique()
+
+        # Identify the number and names of regions in the dataset
+        regions_list = list(datain.region.unique())
+        num_of_regions = datain.region.nunique()
+
+        # Summarize the geographical information (countries, continents, regions ) for the user
+        log_file.write(f"\n\n#------Summary of geographical data in the processed dataset----------------------#\n")
+        log_file.write(f'\nTotal of {len(country_list_post_drop)} are included in the set:\n')
+        for country in country_list_post_drop:
+            log_file.write(f'{country}\n')
+        log_file.write(f'#----------\n')
+
+        log_file.write(f'\n\nTotal of {num_of_continents} continents are included in the set:\n')
+        for continent in continents_list:
+            log_file.write(f'{continent}\n')
+        log_file.write(f'#----------\n')
+
+        log_file.write(f'\n\nTotal of {num_of_regions} regions are included in the set:\n')
+        for region in regions_list:
+            log_file.write(f'{region}\n')
+        log_file.write(f'#-----------------------------------------------------\n')
+
+        # Consolidate the column data into a single dictionary
+        country_column_data = dict()
+        country_column_data['all'] = country_column_list
+        country_column_data['numeric'] = numeric_column_list
+        country_column_data['non_numeric'] = non_numeric_column_list
+
+        # Consolidate the geographical data into a single dictionary
+        country_geo_data = dict()
+        country_geo_data['countries'] = country_list_post_drop
+        country_geo_data['continents'] = continents_list
+        country_geo_data['regions'] = regions_list
 
     # Create a copy of the datain before return - no further processing will be done on the processed DataFrame inplace
     country_data_post_process = datain.copy()
-    return country_data_post_process, country_column_list, numeric_column_list, non_numeric_column_list, columns_nan_percentage
+    return country_data_post_process, country_column_data, country_columns_nan_percentage, country_geo_data
 
 #-----------End of Function process_new_API_data--------------------#
