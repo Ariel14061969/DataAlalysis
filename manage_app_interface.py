@@ -6,10 +6,13 @@ from import_country_data import import_country_data
 
 # -------------------------------------------------------------------------#
 # Function: validate_data_source_select                                    #
+#                                                                          #
 # Goal:     Validate the user selection of data source. While input is     #
 #           not a valid value, it clears the input and waits for a valid   #
 #           value.                                                         #
+#                                                                          #
 # Input:    None                                                           #
+#                                                                          #
 # Return:   None ( VOID )                                                  #
 #--------------------------------------------------------------------------#
 def validate_data_source_select():
@@ -17,31 +20,42 @@ def validate_data_source_select():
     if ((current_input.lower() != 'y') & (current_input.lower() != 'n')):
         st.error(f"'{current_input}' is not a valid selection, please select either 'y' or 'n'. Clearing input.")
         st.session_state.data_source_select_input = ""  # If validation fails, clear the input by setting its session_state value to an empty string
+#----------------------------------------End of Function validate_data_source_select----------------------------------------------------------------#
 
-#-----------End of Function validate_data_source_select--------------------#
 
-
-# -----------------------------------------------------------------------------#
-# Function: st_ui_start                                                        #
-#                                                                              #
-# Goals:                                                                       #
-# 1. Ask for user name and selecion of data source ( imported / existing )     #
-# 2. Validate the user selection of data source, using function                #
-#    "validate_data_source_select"                                             #
-# 3. Based on a valid user selection of the data source, it runs               #
-#    the proper analysis and returns the clean dataframe to the                #
-#    process that invoked it.                                                  #
-#                                                                              #
-# Input:  None                                                                 #
-#                                                                              #
-# Return: 1. A clean dataframe for further data analysis                       #
-#            ( empty cells may still exist on some columns, see item 5 below ) #
-#         2. List of all columns ( after index replaced to country name )      #
-#         3. List of all numeric columns                                       #
-#         4. List of all non-numeric columns                                   #
-#         5. A dictionary that holds each of the numeric column names          #
-#            as key and the percentage of empty cells in each column           #
-#------------------------------------------------------------------------------#
+# -------------------------------------------------------------------------------------------#
+# Function: st_ui_start                                                                      #
+#                                                                                            #
+# Goals:    1. Ask for user name and selecion of data source ( imported / existing )         #
+#                                                                                            #
+#           2. Validate the user selection of data source, using function                    #
+#              "validate_data_source_select"                                                 #
+#                                                                                            #
+#           3. Based on a valid user selection of the data source, it runs                   #
+#              the proper analysis and returns the clean dataframe to the                    #
+#              process that invoked it.                                                      #
+#                                                                                            #
+#                                                                                            #
+# Input:    Threshold parameter indicating the number of non empty cells relative to the     #
+#           total number of cells in a row. Used as threshold in the of dropna function      #
+#                                                                                            #
+#                                                                                            #
+# Return:   1. A clean dataframe for further data analysis                                   #
+#              ( empty cells may still exist on some columns, see item 5 below )             #
+#                                                                                            #
+#           2. A Dictionary that includes:                                                   #
+#              * List of all columns ( after index replaced to country name )                #
+#              * List of all numeric columns                                                 #
+#              * List of all non-numeric columns                                             #
+#                                                                                            #
+#           3. A dictionary that holds each of the numeric column names                      #
+#              as key and the percentage of empty cells in each column                       #
+#                                                                                            #
+#           4. A dictionary that holds the geographic data in the post processed dataset:    #
+#              * Names of all countries                                                      #
+#              * Names of all continents                                                     #
+#              * Names of all regions                                                        #
+#--------------------------------------------------------------------------------------------#
 def st_ui_start(row_dropna_threshold_factor = 0.9):
     st.markdown(
         "<h3 style='text-align: left; color: white; font-weight: bold;'>MyCountry - The World In Your Hands</h2>",
@@ -84,8 +98,8 @@ def st_ui_start(row_dropna_threshold_factor = 0.9):
             quit()
 
         country_data_pre_process = country_data_orig.copy()
-        country_data, country_column_data, country_columns_nan_percentage, country_geo_data  = process_new_data(country_data_pre_process, row_dropna_threshold_factor)
-        return country_data, country_column_data, country_columns_nan_percentage, country_geo_data, 'new'
+        country_data, country_column_data, country_columns_nan_percentage, country_geo_data  = process_new_data(country_data_pre_process, 'new', row_dropna_threshold_factor)
+        return country_data, country_column_data, country_columns_nan_percentage, country_geo_data
 
     else:
         try:
@@ -99,34 +113,58 @@ def st_ui_start(row_dropna_threshold_factor = 0.9):
             quit()
 
         country_data_pre_process = country_data_orig.copy()
-        country_data, country_column_data, country_columns_nan_percentage, country_geo_data  = process_new_data(country_data_pre_process, row_dropna_threshold_factor)
-        return country_data, country_column_data, country_columns_nan_percentage, country_geo_data, 'current'
+        country_data, country_column_data, country_columns_nan_percentage, country_geo_data  = process_new_data(country_data_pre_process, 'current', row_dropna_threshold_factor)
+        return country_data, country_column_data, country_columns_nan_percentage, country_geo_data
+#-----------------------------------------------------End of Function validate_data_source_select---------------------------------------------------------------------#
 
-#-----------End of Function validate_data_source_select-----------#
-
-# --------------------------------------------------------------------------#
-# Function: process_new_data                                                #
-# Goal:     Prepare and clean the DataFrame                                 #
-#           1. Remove duplicates, if any, based on the Country column       #
-#           2. Set the country name as index of the DataFrame               #
-#           3. Identify empty cells on each row and remove rows in which    #
-#              the number of empty cells exceeds a pre-defined threshold    #
-#              ( Default is 10% )                                           #
-#           4. Identify NaNs                                                #
-#                                                                           #
-# Input:    New DataFrame read from the API                                 #
-#                                                                           #
-# Return:   1. Cleaned DataFrame                                            #
-#           2. List of all columns ( after index replaced to country name ) #
-#           3. List of all numeric columns                                  #
-#           4. List of all non-numeric columns                              #
-#           5. A dictionary that holds each of the numeric column names     #
-#              as key and the percentage of empty cells in each column      #
-#---------------------------------------------------------------------------#
-def process_new_data(datain, row_dropna_threshold_factor = 0.9):
+# ---------------------------------------------------------------------------------------------------#
+# Function: process_new_data                                                                         #
+#                                                                                                    #
+# Goal:     1. Analyze and clean the the Data                                                        #
+#              * Remove duplicates, if any, based on the Country column                              #
+#              * Set the country name as index of the DataFrame                                      #
+#              * Identify empty cells on each row and remove rows in which                           #
+#                the number of empty cells exceeds a pre-defined threshold (Default is 10%)          #
+#                                                                                                    #
+#           2. Identify percentage of NaNs in each numerical columns                                 #
+#                                                                                                    #
+#           3. Extract the named of countries, continents and regions in the dataset                 #
+#                                                                                                    #
+#                                                                                                    #
+# Input:    1. New DataFrame created from either a new API or from existing csv file                 #
+#              originally generated during a previous read of data from an API                       #
+#                                                                                                    #
+#           2. A string that specifies the desired source of data                                    #
+#              * 'new' - DataFrame source is a new dataset, read from an API during this run         #
+#              * 'current' - Data source is an existing local csv                                    #
+#                                                                                                    #
+#           3. A Threshold parameter indicating the allowed number of non empty cells relative to    #
+#              the total number of cells in a row. Used to claculate the threshold in the            #
+#              dropna function                                                                       #
+#                                                                                                    #
+# Return:   1. Cleaned DataFrame                                                                     #
+#                                                                                                    #
+#           2. A Dictionary that includes:                                                           #
+#              * List of all columns ( after index replaced to country name )                        #
+#              * List of all numeric columns                                                         #
+#              * List of all non-numeric columns                                                     #
+#                                                                                                    #
+#           3. A dictionary that holds each of the numeric column names                              #
+#              as key and the percentage of empty cells in each column                               #
+#                                                                                                    #
+#           4. A dictionary that holds the geographic data in the post processed dataset:            #
+#              * Names of all countries                                                              #
+#              * Names of all continents                                                             #
+#              * Names of all regions                                                                #
+#----------------------------------------------------------------------------------------------------#
+def process_new_data(datain, data_import_type, row_dropna_threshold_factor = 0.9):
     # Open a log file for debug and review
     with open('country_data_anlyze_and_process_log.txt', 'w') as log_file:
         log_file.write(f'Log opened at: {dt.datetime.now(zi.ZoneInfo("Asia/Jerusalem")).strftime("%Y-%m-%d %H:%M:%S")}\n')
+        if (data_import_type == 'new'):
+            log_file.write(f'Run on new data imported during this run\n')
+        else:
+            log_file.write(f'Run on data imported from existing csv file created in the past\n')
         log_file.write(f'Starting Analysis and Processing...\n')
 
     # ---------------------- Remove Duplicates on the 'Country' Column----------------------------#
@@ -239,4 +277,75 @@ def process_new_data(datain, row_dropna_threshold_factor = 0.9):
     country_data_post_process = datain.copy()
     return country_data_post_process, country_column_data, country_columns_nan_percentage, country_geo_data
 
-#-----------End of Function process_new_API_data--------------------#
+#-----------------------------------------End of Function process_new_data-------------------------------------------------#
+
+
+# -------------------------------------------------------------------------#
+# Function: st_user_select_analysis                                        #
+#                                                                          #
+# Goal:     Create the user selection manual in streamlit ,receive the     #
+#           selected value and send it back to the main function.          #
+#                                                                          #
+# Input:    1.List of countries                                            #
+#           2.List of continents                                           #
+#           3.List of regions                                              #
+#                                                                          #
+# Return:   1.Selected analysis type ( one of the below options):          #
+#             * intra_country                                              #
+#             * inter_country                                              #
+#             * intra_continent                                            #
+#             * inter_continent                                            #
+#             * intra_region                                               #
+#             * inter_region                                               #
+#                                                                          #
+#          2.Selected country / continent / region to be analyzed          #
+#--------------------------------------------------------------------------#
+def st_user_select_analysis(country_list, continents_list, regions_list):
+    analysis_options = [ '','intra_country', 'inter_country',
+                        'intra_continent', 'inter_continent',
+                        'intra_region', 'inter_region']
+
+    # Add empty space as the first value of each list such that user has to select
+    country_list_modified = [''] + country_list
+    continents_list_modified = [''] + continents_list
+    regions_list_modified = [''] + regions_list
+
+    col_label, col_select, col_empty = st.columns([1, 1, 8])
+    with col_label:
+        st.markdown("<h3 style='color:white;'><b>Analysis Type</b></h3>", unsafe_allow_html=True)
+    with col_select:
+        selected_analysis = st.selectbox('Analysis Type', analysis_options, label_visibility='hidden', key='analysis_type')
+    if not selected_analysis:
+        st.stop()
+
+
+    if (selected_analysis == 'intra_country') | (selected_analysis == 'inter_country'):
+        col_label, col_select, col_empty = st.columns([1, 1, 8])
+        with col_label:
+            st.markdown("<h3 style='color:white;'><b>Countries</b></h3>", unsafe_allow_html=True)
+        with col_select:
+            selected_country = st.selectbox('Countries', country_list_modified, label_visibility='hidden', key='country_select')
+            if not selected_country:
+                st.stop()
+        return selected_analysis, selected_country
+
+    elif (selected_analysis == 'intra_continent') | (selected_analysis == 'inter_continent'):
+        col_label, col_select, col_empty = st.columns([1, 1, 8])
+        with col_label:
+            st.markdown("<h3 style='color:white;'><b>Continents</b></h3>", unsafe_allow_html=True)
+        with col_select:
+            selected_continent = st.selectbox('Continents', continents_list_modified, label_visibility='hidden', key='continent_select')
+            if not selected_continent:
+                st.stop()
+        return selected_analysis, selected_continent
+
+    else:
+        col_label, col_select, col_empty = st.columns([1, 1, 8])
+        with col_label:
+            st.markdown("<h3 style='color:white;'><b>Regions</b></h3>", unsafe_allow_html=True)
+        with col_select:
+            selected_region = st.selectbox('Regions', regions_list_modified, label_visibility='hidden', key='region_select')
+            if not selected_region:
+                st.stop()
+        return selected_analysis, selected_region
+#----------------------------------------End of Function st_user_select_analysis -------------------------------------------------------#
