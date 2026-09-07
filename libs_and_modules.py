@@ -23,6 +23,6 @@ import matplotlib as plt
 import plotly as px
 import streamlit as st
 import requests
-import cairocffi
-import cairosvg as svg
+#import cairocffi
+#import cairosvg as svg
 #-------------------------------#
