@@ -7,7 +7,7 @@ from manage_app_interface import *
 from Intra_country_functions import *
 from Inter_Country import inter_country
 from Inter_Continent import inter_continent
-
+from Inter_Region import inter_region
 # Default values for configurable parameters
 row_dropna_threshold_factor = 0.9 # The relation between the number of non empty cells to the total number of cells in a row
 
@@ -31,11 +31,18 @@ if analysis_type == 'intra_country':
 
 # To be integrated into the manage_app_interface - Temporarily here for inspection
 #get_country_id_data(country_data.loc[['Canada']],country_all_columns)
+
+
 MyCountry = st.selectbox('Select Country',country_data.index)
 figs = inter_country(country_data,MyCountry,compareTo='World')
 for fig in figs:
     st.pyplot(fig)
 
 figs= inter_continent(country_data)
+for fig in figs:
+    st.pyplot(fig)
+
+
+figs= inter_region(country_data)
 for fig in figs:
     st.pyplot(fig)
