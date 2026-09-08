@@ -21,6 +21,7 @@ def inter_country(country_data,MyCountry,compareTo='World'):
         df = country_data[country_data['region']==MyRegion]
 
     DivideByPop = ['tourists','area','co2_emissions']
+    ng=0
     for col in df.keys():
         if col not in exclude_col and isinstance(df.loc[MyCountry,col],float):
             df['rel']=df[col]
@@ -29,26 +30,30 @@ def inter_country(country_data,MyCountry,compareTo='World'):
                 df['rel']= df['rel']/df['population']
                 lb = lb + ' per capita'
 
-
-            fig, ax = plt.subplots(figsize=(8, 5))
+            if ng % 4 == 0:
+                fig, axes = plt.subplots(2,2,figsize=(12, 6))
+                axes = axes.flatten()
+            ax = axes[ng % 4]
 
             sns.histplot(df['rel'].dropna() , bins = 30,ax=ax)
             min_country = df['rel'].idxmin()
             max_country = df['rel'].idxmax()
             median_country = (df['rel'] - df['rel'].median()).abs().idxmin()
             countries_of_interest =[min_country,max_country,median_country]
-            plt.xlabel(lb)
+            ax.set_xlabel(lb)
             if df.loc[MyCountry,'rel']:
                 max_count = max([bar.get_height() for bar in ax.containers[0]])
 
                 xval = df.loc[MyCountry,'rel']
 
-                plt.vlines(x=xval, ymin=0, ymax=max_count, colors="red", linestyles="dashed", lw=2)
-                plt.text(x=xval, y=max_count * 0.75, s=f" {MyCountry}", color="red", rotation=0, va='top')
+                ax.vlines(x=xval, ymin=0, ymax=max_count, colors="red", linestyles="dashed", lw=2)
+                ax.text(x=xval, y=max_count * 0.75, s=f" {MyCountry}", color="red", rotation=0, va='top')
                 for countryOfInterest in countries_of_interest:
                     xval = df.loc[countryOfInterest, 'rel']
-                    plt.vlines(x=xval, ymin=0, ymax=max_count, colors="green", linestyles="dashed", lw=1)
-                    plt.text(x=xval, y=max_count , s=f" {countryOfInterest}",  color="green", rotation=45, va='top')
+                    ax.vlines(x=xval, ymin=0, ymax=max_count, colors="green", linestyles="dashed", lw=1)
+                    ax.text(x=xval, y=max_count , s=f" {countryOfInterest}",  color="green", rotation=45, va='top')
+            if ng % 4 ==  1:
                 figs.append(fig)
+            ng=ng+1
 
     return figs
