@@ -11,9 +11,16 @@ from libs_and_modules import *
 #                                                                                                                      #
 # Return:   None ( VOID )                                                                                              #
 #----------------------------------------------------------------------------------------------------------------------#
-def run_intra_country_analysis(country_row, country_all_columns):
-    get_country_id_data(country_row, country_all_columns)
-    single_counrty_plots(country_row)
+def run_intra_country_analysis(country_row, country_all_columns ):
+    # Open the Intra country analysis log file
+    log_file = open('intra_country_functions_log.txt', 'a+')
+    log_file.write(f'Log opened at: {dt.datetime.now(zi.ZoneInfo("Asia/Jerusalem")).strftime("%Y-%m-%d %H:%M:%S")}\n')
+    log_file.write(f'#-------------------------------------------------------------------------------------------#\n')
+
+    # Call the analysis functions
+    get_country_id_data(country_row, country_all_columns,log_file)
+    single_counrty_plots(country_row,log_file)
+    log_file.close()
 #----------------------------------End of Function run_intra_country_analysis------------------------------------------#
 
 
@@ -27,7 +34,9 @@ def run_intra_country_analysis(country_row, country_all_columns):
 #                                                                                                                      #
 # Return:   None ( VOID )                                                                                              #
 #----------------------------------------------------------------------------------------------------------------------#
-def get_country_id_data(country_row, country_all_columns):
+def get_country_id_data(country_row, country_all_columns,log_file):
+    log_file.write(f'\nStarting country ID function\n')
+    log_file.write(f'#----------------------------#\n')
     df_country = country_row
     country_id = dict()
     country_name = list(df_country.index)[0]
@@ -35,21 +44,40 @@ def get_country_id_data(country_row, country_all_columns):
     for key in country_all_columns:
         country_id[key] = df_country.loc[country_name][key]
 
+    empty_columns = list()
     # Prepare the content of the country ID
     formatted_data = ''
     for key, value in country_id.items():
         if (key == 'flag_url'):
             continue
-        elif (value is None):
+        elif (pd.isna(value)):
             formatted_data += f"{key}: No Data\n"
+            log_file.write(f'{key}: No Data\n')
+            empty_columns.append(key)  # Record the empty cells that are not the flag_url
         else:
             formatted_data += f"{key}: {value}\n"
+            log_file.write(f'{key}: {value}\n')
 
     # Define the Text Box structure and text format
     col1, col2 = st.columns([2, 7])  # Adjust column ratios for desired width
     with col1:
         st.markdown("<h3 style='color:white;'><b>Country ID</b></h3>", unsafe_allow_html=True)
         st.text_area("Country Details Label", formatted_data, height=400, label_visibility='hidden')
+
+    # Print the cells with no data to the log file
+    if empty_columns:
+        log_file.write(f'\nThe following columns are empty and reported as "No Data" in the country ID:\n')
+        log_file.write('[\n')
+        for val in empty_columns:
+            log_file.write(f'{val}\n')
+        log_file.write(']')
+
+    else:
+        log_file.write(f'\nNo empty cells were found in the data for {country_name}.\n')
+
+    log_file.write(f'\n\nCountry ID function concluded\n')
+    log_file.write(f'#---------------------------------------------------------------#\n')
+
 #-------------------------------------End of Function get_country_id_data-----------------------------------------------#
 
 
@@ -68,143 +96,280 @@ def get_country_id_data(country_row, country_all_columns):
 #                                                                                                                      #
 # Return:   None ( VOID )                                                                                              #
 #----------------------------------------------------------------------------------------------------------------------#
-def single_counrty_plots(country_row):
+def single_counrty_plots(country_row,log_file):
+    log_file.write(f'\n\nStarting single_country_plots function\n')
+    log_file.write(f'#----------------------------#\n')
+
     country_name = list(country_row.index)[0]
 
+    # Identify missing data for plot selection
+    plots_column_allocation = {
+        'gdp_growth_vs_fertility'  : None,
+        'gdp_growth_vs_pop_growth' : None,
+        'imports_and_exports'      : None,
+        'employment_sectors'       : None,
+        'school_enrollment'        : None,
+        'life_expectancy'          : None
+    }
+    plot_columns_counter = 0
+
+    # Extract the value of each relevant column
+    gdp_growth_val = country_row.loc[country_name]['gdp_growth']
+    fertility_val = country_row.loc[country_name]['fertility']
+    pop_growth_val = country_row.loc[country_name]['pop_growth']
+    imports_val = country_row.loc[country_name]['imports']
+    exports_val = country_row.loc[country_name]['exports']
+
+    employment_val = [ country_row.loc[country_name]['employment_services'],
+                       country_row.loc[country_name]['employment_industry'],
+                       country_row.loc[country_name]['employment_agriculture']]
+
+    school_enrollment_val = [ country_row.loc[country_name]['primary_school_enrollment_male'],
+                              country_row.loc[country_name]['primary_school_enrollment_female'],
+                              country_row.loc[country_name]['secondary_school_enrollment_male'],
+                              country_row.loc[country_name]['secondary_school_enrollment_female'],
+                              country_row.loc[country_name]['post_secondary_enrollment_male'],
+                              country_row.loc[country_name]['post_secondary_enrollment_female'] ]
+
+    life_expectancy_val = [country_row.loc[country_name]['life_expectancy_male'],
+                           country_row.loc[country_name]['life_expectancy_female'] ]
+
+    # Allocate columns for plots
+    if ((not pd.isna(gdp_growth_val)) & (not pd.isna(fertility_val))):
+        plot_columns_counter += 1
+        plots_column_allocation['gdp_growth_vs_fertility'] = 'col' + str(plot_columns_counter)
+
+    if ((not pd.isna(gdp_growth_val)) & (not pd.isna(pop_growth_val))):
+        plot_columns_counter += 1
+        plots_column_allocation['gdp_growth_vs_pop_growth'] = 'col' + str(plot_columns_counter)
+
+    if ((not pd.isna(imports_val)) & (not pd.isna(exports_val))):
+        plot_columns_counter += 1
+        plots_column_allocation['imports_and_exports'] = 'col' + str(plot_columns_counter)
+
+    if all(not pd.isna(val) for val in employment_val):
+        plot_columns_counter += 1
+        plots_column_allocation['employment_sectors'] = 'col' + str(plot_columns_counter)
+
+    if all(not pd.isna(val) for val in school_enrollment_val):
+        plot_columns_counter += 1
+        plots_column_allocation['school_enrollment'] = 'col' + str(plot_columns_counter)
+
+    if all(not pd.isna(val) for val in life_expectancy_val):
+        plot_columns_counter += 1
+        plots_column_allocation['life_expectancy'] = 'col' + str(plot_columns_counter)
+
+    # Update log file - Cells with missing values
+    num_of_empty_cells = 6 - plot_columns_counter
+    if num_of_empty_cells > 0:
+        log_file.write(f'\n\nThere are {num_of_empty_cells} cells in the plot list that have no data. Here are their names:\n')
+        no_data_columns = country_row.columns[country_row.isnull().any()].tolist()
+        if no_data_columns:
+            for column_name in no_data_columns:
+                log_file.write(f'column_name\n')
+
+        log_file.write(f'\n\nThe following plots were not drawn since one or more of their values has no data:\n')
+        for key,value in plots_column_allocation.items():
+            if value is None:
+                log_file.write(f'{key}\n')
+    else:
+        log_file.write(f'\nAll cells used for plots have data. All figures plotted\n')
+
+
     # ---------------Plotting gdp_growth vs. fertility-----------------------#
-    col1, col2 = st.columns([1, 1])
+    if plot_columns_counter >= 1:
+        col1, col2 = st.columns([1, 1])
 
-    with col1:
-        plot_data_gdp_fert = country_row.loc[country_name][['gdp_growth', 'fertility']]
-        # Create a bar plot for GDP Growth and Fertility
-        fig_gdp_fert, ax_gdp_fert = plt.pyplot.subplots(figsize=(8, 5))
-        plot_data_gdp_fert.plot(kind='bar', ax=ax_gdp_fert, color=['skyblue', 'lightcoral'])
+        if plots_column_allocation['gdp_growth_vs_fertility'] is not None:
+            with col1:
+                plot_data_gdp_fert = country_row.loc[country_name][['gdp_growth', 'fertility']]
+                # Create a bar plot for GDP Growth and Fertility
+                fig_gdp_fert, ax_gdp_fert = plt.pyplot.subplots(figsize=(8, 5))
+                plot_data_gdp_fert.plot(kind='bar', ax=ax_gdp_fert, color=['skyblue', 'lightcoral'])
 
-        ax_gdp_fert.set_title('GDP Growth vs. Fertility')
-        ax_gdp_fert.set_ylabel('Value in [%]')
-        ax_gdp_fert.set_xlabel('Indicator')
-        ax_gdp_fert.tick_params(axis='x', rotation=0)
-        plt.pyplot.grid(axis='y', linestyle='--', alpha=0.7)
-        plt.pyplot.tight_layout()
-        st.pyplot(fig_gdp_fert)
+                ax_gdp_fert.set_title('GDP Growth vs. Fertility')
+                ax_gdp_fert.set_ylabel('Value in [%]')
+                ax_gdp_fert.set_xlabel('Indicator')
+                ax_gdp_fert.tick_params(axis='x', rotation=0)
+                plt.pyplot.grid(axis='y', linestyle='--', alpha=0.7)
+                plt.pyplot.tight_layout()
+                st.pyplot(fig_gdp_fert)
+
     #------------------End of bar plot for gdp growth vs. fertility------------#
 
     # --------------------Plotting gdp growth vs. population growth---------------------------#
-    with col2:
-        plot_data_gdp_pop = country_row.loc[country_name][['gdp_growth', 'pop_growth']]
-        fig_gdp_pop, ax_gdp_pop = plt.pyplot.subplots(figsize=(8, 5))
-        plot_data_gdp_pop.plot(kind='bar', ax=ax_gdp_pop, color=['lightgreen', 'yellow'])
+        if plots_column_allocation['gdp_growth_vs_pop_growth'] is not None:
+            col_num = plots_column_allocation['gdp_growth_vs_pop_growth']
+            if ((col_num == 'col1') | (plots_column_allocation['gdp_growth_vs_fertility'] is None)):
+                with col1:
+                    plot_data_gdp_pop = country_row.loc[country_name][['gdp_growth', 'pop_growth']]
+                    fig_gdp_pop, ax_gdp_pop = plt.pyplot.subplots(figsize=(8, 5))
+                    plot_data_gdp_pop.plot(kind='bar', ax=ax_gdp_pop, color=['lightgreen', 'yellow'])
 
-        ax_gdp_pop.set_title('GDP Growth vs. Population Growth')
-        ax_gdp_pop.set_ylabel('Value in [%]')
-        ax_gdp_pop.set_xlabel('Indicator')
-        ax_gdp_pop.tick_params(axis='x', rotation=0)
+                    ax_gdp_pop.set_title('GDP Growth vs. Population Growth')
+                    ax_gdp_pop.set_ylabel('Value in [%]')
+                    ax_gdp_pop.set_xlabel('Indicator')
+                    ax_gdp_pop.tick_params(axis='x', rotation=0)
 
-        plt.pyplot.grid(axis='y', linestyle='--', alpha=0.7)
-        plt.pyplot.tight_layout()
-        st.pyplot(fig_gdp_pop)
+                    plt.pyplot.grid(axis='y', linestyle='--', alpha=0.7)
+                    plt.pyplot.tight_layout()
+                    st.pyplot(fig_gdp_pop)
+
+            else:
+                with col2:
+                    plot_data_gdp_pop = country_row.loc[country_name][['gdp_growth', 'pop_growth']]
+                    fig_gdp_pop, ax_gdp_pop = plt.pyplot.subplots(figsize=(8, 5))
+                    plot_data_gdp_pop.plot(kind='bar', ax=ax_gdp_pop, color=['lightgreen', 'yellow'])
+
+                    ax_gdp_pop.set_title('GDP Growth vs. Population Growth')
+                    ax_gdp_pop.set_ylabel('Value in [%]')
+                    ax_gdp_pop.set_xlabel('Indicator')
+                    ax_gdp_pop.tick_params(axis='x', rotation=0)
+
+                    plt.pyplot.grid(axis='y', linestyle='--', alpha=0.7)
+                    plt.pyplot.tight_layout()
+                    st.pyplot(fig_gdp_pop)
+
     # ------------------End of bar plot for gdp growth vs. population growth-------------------#
 
 
     # ----------------Plotting Import vs. Export----------------#
-    col3, col4 = st.columns([1, 1])
+    #if plot_columns_counter >= 1:
+        col3, col4 = st.columns([1, 1])
 
-    with col3:
-        plot_data_imports_exports = country_row.loc[country_name][['imports', 'exports']]
-        # Create a bar plot for Imports and Exports
-        fig_imports_exports, ax_imports_exports = plt.pyplot.subplots(figsize=(8, 5))
-        plot_data_imports_exports.plot(kind='bar', ax=ax_imports_exports, color=['red', 'green'])
+        if plots_column_allocation['imports_and_exports'] is not None:
+            with col3:
+                plot_data_imports_exports = country_row.loc[country_name][['imports', 'exports']]
+                fig_imports_exports, ax_imports_exports = plt.pyplot.subplots(figsize=(8, 5))
+                plot_data_imports_exports.plot(kind='bar', ax=ax_imports_exports, color=['red', 'green'])
 
-        ax_imports_exports.set_title('Imports vs. Exports')
-        ax_imports_exports.set_ylabel('Value in Millions of $')
-        ax_imports_exports.set_xlabel('Indicator')
-        ax_imports_exports.tick_params(axis='x', rotation=0)
+                ax_imports_exports.set_title('Imports vs. Exports')
+                ax_imports_exports.set_ylabel('Value in Millions of $')
+                ax_imports_exports.set_xlabel('Indicator')
+                ax_imports_exports.tick_params(axis='x', rotation=0)
 
-        plt.pyplot.grid(axis='y', linestyle='--', alpha=0.7)
-        plt.pyplot.tight_layout()
-        st.pyplot(fig_imports_exports)
+                plt.pyplot.grid(axis='y', linestyle='--', alpha=0.7)
+                plt.pyplot.tight_layout()
+                st.pyplot(fig_imports_exports)
     # ------------------End of bar plot for Import vs. Export-------------------#
 
     # ---------Plotting employment sectors breakdown in a pie chart -----------#
-    with col4:
-        # Pie chart for employment data
-        employment_sectors = ['employment_agriculture', 'employment_industry', 'employment_services']
-        employment_values = country_row[employment_sectors].values[0]
-        sum_employment = employment_values.sum()
+        if plots_column_allocation['employment_sectors'] is not None:
+            col_num = plots_column_allocation['employment_sectors']
+            if (((col_num == 'col1') | (col_num == 'col2') | (col_num == 'col3')) & (plots_column_allocation['imports_and_exports'] is None)):
+                with col3:
+                    employment_sectors = ['employment_agriculture', 'employment_industry', 'employment_services']
+                    employment_values = country_row[employment_sectors].values[0]
+                    sum_employment = employment_values.sum()
 
-        # Calculate the 'Other' category
-        other_employment = 100 - sum_employment if sum_employment < 100 else 0  # Assuming values are percentages
+                    # Calculate the 'Other' category
+                    other_employment = 100 - sum_employment if sum_employment < 100 else 0  # Assuming values are percentages
 
-        pie_data = list(employment_values) + [other_employment]
-        pie_labels = ['Agriculture', 'Industry', 'Services', 'Other']
-        pie_colors = ['#ff9999', '#66b3ff', '#99ff99', '#ffcc99']  # Different colors for sectors
+                    pie_data = list(employment_values) + [other_employment]
+                    pie_labels = ['Agriculture', 'Industry', 'Services', 'Other']
+                    pie_colors = ['#ff9999', '#66b3ff', '#99ff99', '#ffcc99']  # Different colors for sectors
 
-        fig_employment_pie, ax_employment_pie = plt.pyplot.subplots(figsize=(8, 5))
-        #ax_employment_pie.pie(pie_data, labels=pie_labels, autopct='%1.1f%%', startangle=90, colors=pie_colors,
-        #                      pctdistance=0.85)
-        wedges, texts, autotexts = ax_employment_pie.pie(pie_data, labels=None, autopct='%1.1f%%', startangle=90,
+                    fig_employment_pie, ax_employment_pie = plt.pyplot.subplots(figsize=(8, 5))
+                    wedges, texts, autotexts = ax_employment_pie.pie(pie_data, labels=None, autopct='%1.1f%%',
+                                                                     startangle=90,
+                                                                     colors=pie_colors, pctdistance=0.85)
+                    ax_employment_pie.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+                    ax_employment_pie.set_title('Employment by Sector')
+
+                    # Create custom legend labels with values
+                    legend_labels = [f'{label}: {value:.1f}%' for label, value in zip(pie_labels, pie_data)]
+                    ax_employment_pie.legend(wedges, legend_labels, title="Sectors", loc="lower left",
+                                             bbox_to_anchor=(-0.1, -0.2))
+
+                    plt.pyplot.tight_layout()
+                    st.pyplot(fig_employment_pie)
+            else:
+                with col4:
+                    employment_sectors = ['employment_agriculture', 'employment_industry', 'employment_services']
+                    employment_values = country_row[employment_sectors].values[0]
+                    sum_employment = employment_values.sum()
+
+                    # Calculate the 'Other' category
+                    other_employment = 100 - sum_employment if sum_employment < 100 else 0  # Assuming values are percentages
+
+                    pie_data = list(employment_values) + [other_employment]
+                    pie_labels = ['Agriculture', 'Industry', 'Services', 'Other']
+                    pie_colors = ['#ff9999', '#66b3ff', '#99ff99', '#ffcc99']  # Different colors for sectors
+
+                    fig_employment_pie, ax_employment_pie = plt.pyplot.subplots(figsize=(8, 5))
+                    wedges, texts, autotexts = ax_employment_pie.pie(pie_data, labels=None, autopct='%1.1f%%', startangle=90,
                                                          colors=pie_colors, pctdistance=0.85)
-        ax_employment_pie.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
-        ax_employment_pie.set_title('Employment by Sector')
+                    ax_employment_pie.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+                    ax_employment_pie.set_title('Employment by Sector')
 
-        # Create custom legend labels with values
-        legend_labels = [f'{label}: {value:.1f}%' for label, value in zip(pie_labels, pie_data)]
-        ax_employment_pie.legend(wedges, legend_labels, title="Sectors", loc="lower left", bbox_to_anchor=(-0.1, -0.2))
+                    # Create custom legend labels with values
+                    legend_labels = [f'{label}: {value:.1f}%' for label, value in zip(pie_labels, pie_data)]
+                    ax_employment_pie.legend(wedges, legend_labels, title="Sectors", loc="lower left", bbox_to_anchor=(-0.1, -0.2))
 
-        plt.pyplot.tight_layout()
-        st.pyplot(fig_employment_pie)
+                    plt.pyplot.tight_layout()
+                    st.pyplot(fig_employment_pie)
     # ------------------End of pie chart for employment sectors-------------------#
 
 
     # ---------------Plotting School Enrollment male vs. Female-----------------------#
-    col5, col6 = st.columns([1, 1])
+        col5, col6 = st.columns([1, 1])
 
-    with col5:
-        # Bar plot for enrollment data
-        enrollment_data_male = country_row[
-            ['primary_school_enrollment_male', 'secondary_school_enrollment_male', 'post_secondary_enrollment_male']].T
-        enrollment_data_female = country_row[['primary_school_enrollment_female', 'secondary_school_enrollment_female',
-                                              'post_secondary_enrollment_female']].T
+        if plots_column_allocation['school_enrollment'] is not None:
+            with col5:
 
-        # The user asked for 'post_secondary_enrollment_male'/'female' twice. Assuming they wanted to combine some or show them distinct.
-        # For clarity, I will take the distinct values. If the user meant a specific aggregate or different metric, further clarification is needed.
-        # Based on the available data, 'secondary_school_enrollment_male' and 'secondary_school_enrollment_female' might also be relevant, but user only specified 'primary' and 'post_secondary'.
+                enrollment_df = pd.DataFrame({
+                    'Male': [country_row['primary_school_enrollment_male'].values[0],
+                             country_row['secondary_school_enrollment_male'].values[0],
+                             country_row['post_secondary_enrollment_male'].values[0]],
+                    'Female': [country_row['primary_school_enrollment_female'].values[0],
+                               country_row['secondary_school_enrollment_female'].values[0],
+                               country_row['post_secondary_enrollment_female'].values[0]]
+                }, index=['Primary School', 'Secondary School', 'Post Secondary'])
 
-        # Prepare data for plotting
-        enrollment_df = pd.DataFrame({
-            'Male': [country_row['primary_school_enrollment_male'].values[0],
-                     country_row['secondary_school_enrollment_male'].values[0],
-                     country_row['post_secondary_enrollment_male'].values[0]],
-            'Female': [country_row['primary_school_enrollment_female'].values[0],
-                       country_row['secondary_school_enrollment_female'].values[0],
-                       country_row['post_secondary_enrollment_female'].values[0]
-                       ]
-        }, index=['Primary School', 'Secondary School', 'Post Secondary'])
+                fig_enrollment, ax_enrollment = plt.pyplot.subplots(figsize=(8, 5))
+                enrollment_df.plot(kind='bar', ax=ax_enrollment, color={'Male': 'steelblue', 'Female': 'palevioletred'})
 
-        fig_enrollment, ax_enrollment = plt.pyplot.subplots(figsize=(8, 5))
-        enrollment_df.plot(kind='bar', ax=ax_enrollment, color={'Male': 'steelblue', 'Female': 'palevioletred'})
-
-        ax_enrollment.set_title('School Enrollment (Male vs. Female)')
-        ax_enrollment.set_ylabel('Enrollment Rate (%)')
-        ax_enrollment.set_xlabel('Education Level')
-        ax_enrollment.tick_params(axis='x', rotation=45)
-        plt.pyplot.grid(axis='y', linestyle='--', alpha=0.7)
-        plt.pyplot.tight_layout()
-        st.pyplot(fig_enrollment)
+                ax_enrollment.set_title('School Enrollment (Male vs. Female)')
+                ax_enrollment.set_ylabel('Enrollment Rate (%)')
+                ax_enrollment.set_xlabel('Education Level')
+                ax_enrollment.tick_params(axis='x', rotation=45)
+                plt.pyplot.grid(axis='y', linestyle='--', alpha=0.7)
+                plt.pyplot.tight_layout()
+                st.pyplot(fig_enrollment)
     #------------------End of bar plot for School Enrollment-------------------#
 
     # ---------------Plotting Life Expectancy male vs. female------------------#
-    with col6:
-        plot_data_life_expectancy = country_row.loc[country_name][['life_expectancy_male', 'life_expectancy_female']]
-        fig_life_expectancy, ax_life_expectancy = plt.pyplot.subplots(figsize=(8, 5))
-        plot_data_life_expectancy.plot(kind='bar', ax=ax_life_expectancy, color=['blue', 'gold'])
+        if plots_column_allocation['life_expectancy'] is not None:
+            col_num = plots_column_allocation['life_expectancy']
+            if (((col_num == 'col1') | (col_num == 'col2') | (col_num == 'col3') | (col_num == 'col4') | (col_num == 'col5')) & (plots_column_allocation['school_enrollment'] is None)) :
+                with col5:
+                    plot_data_life_expectancy = country_row.loc[country_name][['life_expectancy_male', 'life_expectancy_female']]
+                    fig_life_expectancy, ax_life_expectancy = plt.pyplot.subplots(figsize=(8, 5))
+                    plot_data_life_expectancy.plot(kind='bar', ax=ax_life_expectancy, color=['blue', 'gold'])
 
-        ax_life_expectancy.set_title('Life Expectancy Male vs. Female')
-        ax_life_expectancy.set_ylabel('Value in Years')
-        ax_life_expectancy.set_xlabel('Indicator')
-        ax_life_expectancy.tick_params(axis='x', rotation=0)
+                    ax_life_expectancy.set_title('Life Expectancy Male vs. Female')
+                    ax_life_expectancy.set_ylabel('Value in Years')
+                    ax_life_expectancy.set_xlabel('Indicator')
+                    ax_life_expectancy.tick_params(axis='x', rotation=0)
 
-        plt.pyplot.grid(axis='y', linestyle='--', alpha=0.7)
-        plt.pyplot.tight_layout()
-        st.pyplot(fig_life_expectancy)
+                    plt.pyplot.grid(axis='y', linestyle='--', alpha=0.7)
+                    plt.pyplot.tight_layout()
+                    st.pyplot(fig_life_expectancy)
+            else:
+                with col6:
+                    plot_data_life_expectancy = country_row.loc[country_name][['life_expectancy_male', 'life_expectancy_female']]
+                    fig_life_expectancy, ax_life_expectancy = plt.pyplot.subplots(figsize=(8, 5))
+                    plot_data_life_expectancy.plot(kind='bar', ax=ax_life_expectancy, color=['blue', 'gold'])
+
+                    ax_life_expectancy.set_title('Life Expectancy Male vs. Female')
+                    ax_life_expectancy.set_ylabel('Value in Years')
+                    ax_life_expectancy.set_xlabel('Indicator')
+                    ax_life_expectancy.tick_params(axis='x', rotation=0)
+
+                    plt.pyplot.grid(axis='y', linestyle='--', alpha=0.7)
+                    plt.pyplot.tight_layout()
+                    st.pyplot(fig_life_expectancy)
     # ------------------End of bar Life Expectancy-------------------#
+
+    log_file.write(f'\nsingle_counrty_plots function concluded\n')
+    log_file.write(f'#-----------------------------------------------------------------------#\n')
