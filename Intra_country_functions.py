@@ -35,6 +35,14 @@ def run_intra_country_analysis(country_row, country_all_columns ):
 # Return:   None ( VOID )                                                                                              #
 #----------------------------------------------------------------------------------------------------------------------#
 def get_country_id_data(country_row, country_all_columns,log_file):
+
+    import requests
+    import streamlit as st
+    from PIL import Image
+    from io import BytesIO
+    import cairosvg as svg
+    import cairocffi as cairo
+
     log_file.write(f'\nStarting country ID function\n')
     log_file.write(f'#----------------------------#\n')
     df_country = country_row
@@ -48,7 +56,15 @@ def get_country_id_data(country_row, country_all_columns,log_file):
     # Prepare the content of the country ID
     formatted_data = ''
     for key, value in country_id.items():
-        if (key == 'flag_url'):
+        if key == 'flag_url':
+
+            svg_data = requests.get(df_country.loc[country_name,'flag_url']).content
+
+            # Convert vector SVG data into a rasterized PNG byte stream
+            png_data = svg.svg2png(bytestring=svg_data)
+
+            img = Image.open(BytesIO(png_data))
+            st.image(img)
             continue
         elif (pd.isna(value)):
             formatted_data += f"{key}: No Data\n"
