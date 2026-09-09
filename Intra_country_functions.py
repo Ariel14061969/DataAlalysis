@@ -35,14 +35,6 @@ def run_intra_country_analysis(country_row, country_all_columns ):
 # Return:   None ( VOID )                                                                                              #
 #----------------------------------------------------------------------------------------------------------------------#
 def get_country_id_data(country_row, country_all_columns,log_file):
-
-    import requests
-    import streamlit as st
-    from PIL import Image
-    from io import BytesIO
-    import cairosvg as svg
-    import cairocffi as cairo
-
     log_file.write(f'\nStarting country ID function\n')
     log_file.write(f'#----------------------------#\n')
     df_country = country_row
@@ -56,13 +48,11 @@ def get_country_id_data(country_row, country_all_columns,log_file):
     # Prepare the content of the country ID
     formatted_data = ''
     for key, value in country_id.items():
-        if key == 'flag_url':
-
-            svg_data = requests.get(df_country.loc[country_name,'flag_url']).content
+        if (key == 'flag_url'):
+            svg_data = requests.get(df_country.loc[country_name, 'flag_url']).content
 
             # Convert vector SVG data into a rasterized PNG byte stream
             png_data = svg.svg2png(bytestring=svg_data)
-
             img = Image.open(BytesIO(png_data))
             st.image(img)
             continue
@@ -120,21 +110,22 @@ def single_counrty_plots(country_row,log_file):
 
     # Identify missing data for plot selection
     plots_column_allocation = {
-        'gdp_growth_vs_fertility'  : None,
-        'gdp_growth_vs_pop_growth' : None,
-        'imports_and_exports'      : None,
-        'employment_sectors'       : None,
-        'school_enrollment'        : None,
-        'life_expectancy'          : None
+        'imports_and_exports'            : None,
+        'gdp_growth_vs_pop_growth'       : None,
+        'urban_pop_growth_vs_pop_growth' : None,
+        'employment_sectors'             : None,
+        'school_enrollment'              : None,
+        'life_expectancy'                : None
     }
     plot_columns_counter = 0
+    max_possible_num_of_plots = len(plots_column_allocation.keys())
 
     # Extract the value of each relevant column
-    gdp_growth_val = country_row.loc[country_name]['gdp_growth']
-    fertility_val = country_row.loc[country_name]['fertility']
-    pop_growth_val = country_row.loc[country_name]['pop_growth']
     imports_val = country_row.loc[country_name]['imports']
     exports_val = country_row.loc[country_name]['exports']
+    gdp_growth_val = country_row.loc[country_name]['gdp_growth']
+    pop_growth_val = country_row.loc[country_name]['pop_growth']
+    urban_pop_growth_val = country_row.loc[country_name]['urban_population_growth']
 
     employment_val = [ country_row.loc[country_name]['employment_services'],
                        country_row.loc[country_name]['employment_industry'],
@@ -151,17 +142,17 @@ def single_counrty_plots(country_row,log_file):
                            country_row.loc[country_name]['life_expectancy_female'] ]
 
     # Allocate columns for plots
-    if ((not pd.isna(gdp_growth_val)) & (not pd.isna(fertility_val))):
+    if ((not pd.isna(imports_val)) & (not pd.isna(exports_val))):
         plot_columns_counter += 1
-        plots_column_allocation['gdp_growth_vs_fertility'] = 'col' + str(plot_columns_counter)
+        plots_column_allocation['imports_and_exports'] = 'col' + str(plot_columns_counter)
 
     if ((not pd.isna(gdp_growth_val)) & (not pd.isna(pop_growth_val))):
         plot_columns_counter += 1
         plots_column_allocation['gdp_growth_vs_pop_growth'] = 'col' + str(plot_columns_counter)
 
-    if ((not pd.isna(imports_val)) & (not pd.isna(exports_val))):
+    if ((not pd.isna(pop_growth_val)) & (not pd.isna(urban_pop_growth_val))):
         plot_columns_counter += 1
-        plots_column_allocation['imports_and_exports'] = 'col' + str(plot_columns_counter)
+        plots_column_allocation['urban_pop_growth_vs_pop_growth'] = 'col' + str(plot_columns_counter)
 
     if all(not pd.isna(val) for val in employment_val):
         plot_columns_counter += 1
@@ -176,7 +167,7 @@ def single_counrty_plots(country_row,log_file):
         plots_column_allocation['life_expectancy'] = 'col' + str(plot_columns_counter)
 
     # Update log file - Cells with missing values
-    num_of_empty_cells = 6 - plot_columns_counter
+    num_of_empty_cells = max_possible_num_of_plots - plot_columns_counter
     if num_of_empty_cells > 0:
         log_file.write(f'\n\nThere are {num_of_empty_cells} cells in the plot list that have no data. Here are their names:\n')
         no_data_columns = country_row.columns[country_row.isnull().any()].tolist()
@@ -192,31 +183,31 @@ def single_counrty_plots(country_row,log_file):
         log_file.write(f'\nAll cells used for plots have data. All figures plotted\n')
 
 
-    # ---------------Plotting gdp_growth vs. fertility-----------------------#
+    # ---------------Plotting Imports vs. Exports ( Trade Balance ) -----------------------#
     if plot_columns_counter >= 1:
         col1, col2 = st.columns([1, 1])
 
-        if plots_column_allocation['gdp_growth_vs_fertility'] is not None:
+        if plots_column_allocation['imports_and_exports'] is not None:
             with col1:
-                plot_data_gdp_fert = country_row.loc[country_name][['gdp_growth', 'fertility']]
-                # Create a bar plot for GDP Growth and Fertility
-                fig_gdp_fert, ax_gdp_fert = plt.pyplot.subplots(figsize=(8, 5))
-                plot_data_gdp_fert.plot(kind='bar', ax=ax_gdp_fert, color=['skyblue', 'lightcoral'])
+                plot_data_imports_exports = country_row.loc[country_name][['imports', 'exports']]
+                fig_imports_exports, ax_imports_exports = plt.pyplot.subplots(figsize=(8, 5))
+                plot_data_imports_exports.plot(kind='bar', ax=ax_imports_exports, color=['red', 'green'])
 
-                ax_gdp_fert.set_title('GDP Growth vs. Fertility')
-                ax_gdp_fert.set_ylabel('Value in [%]')
-                ax_gdp_fert.set_xlabel('Indicator')
-                ax_gdp_fert.tick_params(axis='x', rotation=0)
+                ax_imports_exports.set_title('Imports vs. Exports ( Trade Balance )')
+                ax_imports_exports.set_ylabel('Value in Millions of $')
+                ax_imports_exports.set_xlabel('Indicator')
+                ax_imports_exports.tick_params(axis='x', rotation=0)
+
                 plt.pyplot.grid(axis='y', linestyle='--', alpha=0.7)
                 plt.pyplot.tight_layout()
-                st.pyplot(fig_gdp_fert)
+                st.pyplot(fig_imports_exports)
 
-    #------------------End of bar plot for gdp growth vs. fertility------------#
+    #------------------End of bar plot for Imports vs. Exports ----------------------------#
 
     # --------------------Plotting gdp growth vs. population growth---------------------------#
         if plots_column_allocation['gdp_growth_vs_pop_growth'] is not None:
             col_num = plots_column_allocation['gdp_growth_vs_pop_growth']
-            if ((col_num == 'col1') | (plots_column_allocation['gdp_growth_vs_fertility'] is None)):
+            if ((col_num == 'col1') | (plots_column_allocation['imports_and_exports'] is None)):
                 with col1:
                     plot_data_gdp_pop = country_row.loc[country_name][['gdp_growth', 'pop_growth']]
                     fig_gdp_pop, ax_gdp_pop = plt.pyplot.subplots(figsize=(8, 5))
@@ -249,25 +240,24 @@ def single_counrty_plots(country_row,log_file):
     # ------------------End of bar plot for gdp growth vs. population growth-------------------#
 
 
-    # ----------------Plotting Import vs. Export----------------#
-    #if plot_columns_counter >= 1:
+    # ----------------Plotting Urban population growth vs Total population growth----------------#
         col3, col4 = st.columns([1, 1])
 
-        if plots_column_allocation['imports_and_exports'] is not None:
+        if plots_column_allocation['urban_pop_growth_vs_pop_growth'] is not None:
             with col3:
-                plot_data_imports_exports = country_row.loc[country_name][['imports', 'exports']]
-                fig_imports_exports, ax_imports_exports = plt.pyplot.subplots(figsize=(8, 5))
-                plot_data_imports_exports.plot(kind='bar', ax=ax_imports_exports, color=['red', 'green'])
+                plot_data_urban_pg_vs_total_pg = country_row.loc[country_name][['urban_population_growth', 'pop_growth']]
+                fig_urban_pg_vs_total_pg, ax_urban_pg_vs_total_pg = plt.pyplot.subplots(figsize=(8, 5))
+                plot_data_urban_pg_vs_total_pg.plot(kind='bar', ax=ax_urban_pg_vs_total_pg, color=['red', 'green'])
 
-                ax_imports_exports.set_title('Imports vs. Exports')
-                ax_imports_exports.set_ylabel('Value in Millions of $')
-                ax_imports_exports.set_xlabel('Indicator')
-                ax_imports_exports.tick_params(axis='x', rotation=0)
+                ax_urban_pg_vs_total_pg.set_title('Urban Population Growth vs. Total Population Growth')
+                ax_urban_pg_vs_total_pg.set_ylabel('Value in [%]')
+                ax_urban_pg_vs_total_pg.set_xlabel('Indicator')
+                ax_urban_pg_vs_total_pg.tick_params(axis='x', rotation=0)
 
                 plt.pyplot.grid(axis='y', linestyle='--', alpha=0.7)
                 plt.pyplot.tight_layout()
-                st.pyplot(fig_imports_exports)
-    # ------------------End of bar plot for Import vs. Export-------------------#
+                st.pyplot(fig_urban_pg_vs_total_pg)
+    # ------------------End of bar plot for Urban Population Growth vs Total Population Growth-------------------#
 
     # ---------Plotting employment sectors breakdown in a pie chart -----------#
         if plots_column_allocation['employment_sectors'] is not None:
