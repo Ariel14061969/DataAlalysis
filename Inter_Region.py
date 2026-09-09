@@ -1,7 +1,12 @@
+# Import libraries
+from libs_and_modules import *
+
 def inter_region(country_data):
-    import seaborn as sns
-    import statistics as stt
-    import matplotlib.pyplot as plt
+
+    # Lior Sinay 10/09/26 - Put in comment. Reading * from libs and modules instead
+    #import seaborn as sns
+    #import statistics as stt
+    #import matplotlib.pyplot as plt
     figs = []
     df = country_data
 
@@ -14,7 +19,9 @@ def inter_region(country_data):
         if col not in exclude_col and  isinstance(df.loc[df.index[0],col],float):
             grouped_df = df.groupby('region')[col].mean()
             if ng % 4 ==0:
-                fig, axes = plt.subplots(2,2,figsize=(12, 6))
+                #Lior Sinay 10/09/26 - Replaced plt with plt.pyplot
+                #fig, axes = plt.subplots(2,2,figsize=(12, 6))
+                fig, axes = plt.pyplot.subplots(2, 2, figsize=(12, 6))
                 axes = axes.flatten()
             ax = axes[ng % 4]
             lb = col

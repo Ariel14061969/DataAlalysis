@@ -1,10 +1,14 @@
-from statistics import mean
+# Lior Sinay 10/09/26 - placed in comment , importing * from libs and modules
+#from statistics import mean
 
+# Import libraries
+from libs_and_modules import *
 
 def inter_country(country_data,MyCountry,compareTo='World'):
 
-    import seaborn as sns
-    import matplotlib.pyplot as plt
+    # Lior Sinay 10/09/26 - placed in comment , importing * from libs and modules
+    #import seaborn as sns
+    #import matplotlib.pyplot as plt
 
     figs=[]
     MyContinent = country_data.loc[MyCountry,'Continent']
@@ -31,7 +35,9 @@ def inter_country(country_data,MyCountry,compareTo='World'):
                 lb = lb + ' per capita'
 
             if ng % 4 == 0:
-                fig, axes = plt.subplots(2,2,figsize=(12, 6))
+                # Lior Sinay 10/09/26 - replaced plt with plt.pyplot
+                #fig, axes = plt.subplots(2,2,figsize=(12, 6))
+                fig, axes = plt.pyplot.subplots(2, 2, figsize=(12, 6))
                 axes = axes.flatten()
             ax = axes[ng % 4]
 

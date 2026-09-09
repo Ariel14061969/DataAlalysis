@@ -12,6 +12,9 @@ import tomllib
 import io
 import os
 from PIL import Image
+from io import BytesIO
+from statistics import mean
+import statistics as stt
 #---------------------------------#
 
 # External
@@ -23,6 +26,6 @@ import matplotlib as plt
 import plotly as px
 import streamlit as st
 import requests
-#import cairocffi
-#import cairosvg as svg
+import cairocffi as cairo
+import cairosvg as svg
 #-------------------------------#
