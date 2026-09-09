@@ -7,7 +7,7 @@ def inter_region(country_data):
 
     exclude_col = ["gdp","rel","population","surface_area"]
 
-    DivideByPop = ['tourists','area','co2_emissions']
+    DivideByPop = ['tourists','area','co2_emissions','imports','exports','refugees']
     ng =0
     for col in df.keys():
 

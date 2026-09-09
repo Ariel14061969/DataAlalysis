@@ -20,7 +20,7 @@ def inter_country(country_data,MyCountry,compareTo='World'):
     else: #compareTo == 'Region':
         df = country_data[country_data['region']==MyRegion]
 
-    DivideByPop = ['tourists','area','co2_emissions']
+    DivideByPop = ['tourists','area','co2_emissions','imports','exports','refugees']
     ng=0
     for col in df.keys():
         if col not in exclude_col and isinstance(df.loc[MyCountry,col],float):

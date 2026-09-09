@@ -8,6 +8,7 @@ from Intra_country_functions import *
 from Inter_Country import inter_country
 from Inter_Continent import inter_continent
 from Inter_Region import inter_region
+from Correlation_Matrix import *
 
 # Default values for configurable parameters
 row_dropna_threshold_factor = 0.9 # The relation between the number of non empty cells to the total number of cells in a row
@@ -42,6 +43,12 @@ if analysis_type == 'inter_continent':
 
 if analysis_type == 'inter_continent':
     figs= inter_region(country_data)
+    for fig in figs:
+        st.pyplot(fig)
+
+if analysis_type == 'inter_continent':
+    fig,matrix= correlation_matrix(country_data)
+    figs = plot_interesting_correlations(country_data, matrix, 0.8)
     for fig in figs:
         st.pyplot(fig)
 
