@@ -45,28 +45,30 @@ def st_ui_start(row_dropna_threshold_factor = 0.9):
         unsafe_allow_html=True)
 
     # Ask the user to select whether to import new data or use existing
-    import_data_options = ['','n', 'y']
+    #import_data_options = ['','n', 'y']
+    import_data_options = ['n', 'y']
     st.markdown("<div style='color:white; margin-bottom:-20px;'>Re-import data ? (y = re-import / n = use existing):</div>",
                 unsafe_allow_html=True)
     col_select, col_empty = st.columns([1, 8])
     with col_select:
-        Import_data = st.selectbox('Import Data (y/n)', import_data_options, label_visibility='hidden', key='import_data_selection')
+        Import_data = st.selectbox('Import Data (y/n)', import_data_options, label_visibility='hidden', index = 0, key='import_data_selection')
     if not Import_data:
         st.stop()
 
     # Ask the user whether to delete log files from previous runs
-    delete_previous_log_options = ['','n', 'y']
+    #delete_previous_log_options = ['','n', 'y']
+    delete_previous_log_options = ['n', 'y']
     st.markdown("<div style='color:white; margin-bottom:-20px;'>Delete log file ? (y = delete / n = keep):</div>",
                 unsafe_allow_html=True)
     col_select, col_empty = st.columns([1, 8])
     with col_select:
-        Delete_logs = st.selectbox('Delete logs (y/n)', delete_previous_log_options, label_visibility='hidden', key='delet_logs_selection')
+        Delete_logs = st.selectbox('Delete logs (y/n)', delete_previous_log_options, label_visibility='hidden', index = 0, key='delet_logs_selection')
     if not Delete_logs:
         st.stop()
 
     # Clean up log files from previous runs if user selected 'y'
     if (Delete_logs.lower() == 'y'):
-        log_file_list = ['country_data_anlyze_and_process_log.txt',
+        log_file_list = ['country_data_analyze_and_process_log.txt',
                          'intra_country_functions_log.txt',
                          'intra_continent_functions_log.txt',
                          'intra_region_functions_log.txt']
@@ -152,8 +154,9 @@ def st_ui_start(row_dropna_threshold_factor = 0.9):
 #----------------------------------------------------------------------------------------------------#
 def process_new_data(datain, data_import_type, row_dropna_threshold_factor = 0.9):
     # Open a log file for debug and review
-    with open('country_data_anlyze_and_process_log.txt', 'w') as log_file:
-        log_file.write(f'Log opened at: {dt.datetime.now(zi.ZoneInfo("Asia/Jerusalem")).strftime("%Y-%m-%d %H:%M:%S")}\n')
+    with open('country_data_analyze_and_process_log.txt', 'w') as log_file:
+        log_file.write(f'Log opened at: {dt.datetime.now(zi.ZoneInfo("Asia/Jerusalem")).strftime("%Y-%m-%d %H:%M:%S")} Jerusalm time. '
+                       f'UTC time is {dt.datetime.now(zi.ZoneInfo("UTC")).strftime("%Y-%m-%d %H:%M:%S")}\n')
         if (data_import_type == 'new'):
             log_file.write(f'Run on new data imported during this run\n')
         else:
