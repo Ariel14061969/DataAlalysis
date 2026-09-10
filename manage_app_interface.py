@@ -297,13 +297,16 @@ def process_new_data(datain, data_import_type, row_dropna_threshold_factor = 0.9
 #             * inter_continent                                            #
 #             * intra_region                                               #
 #             * inter_region                                               #
+#             * correlation_matrix                                         #
 #                                                                          #
 #          2.Selected country / continent / region to be analyzed          #
+#            comment: If the selected option is correlation_matrix then    #
+#                     the returned target_entity is None                   #
 #--------------------------------------------------------------------------#
 def st_user_select_analysis(country_list, continents_list, regions_list):
     analysis_options = [ '','intra_country', 'inter_country',
                         'intra_continent', 'inter_continent',
-                        'intra_region', 'inter_region']
+                        'intra_region', 'inter_region', 'correlation_matrix']
 
     # Add empty space as the first value of each list such that user has to select
     country_list_modified = [''] + country_list
@@ -329,7 +332,8 @@ def st_user_select_analysis(country_list, continents_list, regions_list):
                 st.stop()
         return selected_analysis, selected_country
 
-    elif (selected_analysis == 'intra_continent') | (selected_analysis == 'inter_continent'):
+    #elif (selected_analysis == 'intra_continent') | (selected_analysis == 'inter_continent'):
+    elif (selected_analysis == 'intra_continent'):
         col_label, col_select, col_empty = st.columns([1, 1, 8])
         with col_label:
             st.markdown("<h3 style='color:white;'><b>Continents</b></h3>", unsafe_allow_html=True)
@@ -339,7 +343,8 @@ def st_user_select_analysis(country_list, continents_list, regions_list):
                 st.stop()
         return selected_analysis, selected_continent
 
-    else:
+    #elif (selected_analysis == 'intra_region') | (selected_analysis == 'inter_region'):
+    elif (selected_analysis == 'intra_region'):
         col_label, col_select, col_empty = st.columns([1, 1, 8])
         with col_label:
             st.markdown("<h3 style='color:white;'><b>Regions</b></h3>", unsafe_allow_html=True)
@@ -348,4 +353,7 @@ def st_user_select_analysis(country_list, continents_list, regions_list):
             if not selected_region:
                 st.stop()
         return selected_analysis, selected_region
+
+    else: # selected analysis is either inter_continent, inter_region or correlation matrix, no target entity required, so None is returned instead
+        return selected_analysis, None
 #----------------------------------------End of Function st_user_select_analysis -------------------------------------------------------#

@@ -66,8 +66,10 @@ if analysis_type == 'inter_region':
     for fig in figs:
         st.pyplot(fig)
 
-if analysis_type == 'inter_continent':
+if analysis_type == 'correlation_matrix':
     fig,matrix= correlation_matrix(country_data)
     figs = plot_interesting_correlations(country_data, matrix, 0.8)
     for fig in figs:
         st.pyplot(fig)
+
+# End of main code
