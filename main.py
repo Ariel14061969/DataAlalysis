@@ -21,19 +21,6 @@ plt.pyplot.rcParams['figure.max_open_warning'] = 30  # Set the limit for warning
 set_st_bg('streamlit_countries_background.jpg')
 config_st_page()
 country_data, country_column_data, country_columns_nan_percentage, country_geo_data = st_ui_start(row_dropna_threshold_factor)
-
-# Describe each of the parameters in the API  and the descriptive statistics of the selected DataFrame on the screen
-char_exp = units_txt()
-st.markdown("<div style='color:white; margin-bottom:-20px;'>Description of the numeric variables in the data </div>",unsafe_allow_html=True)
-st.markdown("<div style='color:white; margin-bottom:0px;'>---------------------------------------------------------------</div>",unsafe_allow_html=True)
-st.dataframe(char_exp)
-
-# Print the descriptive statistics of the selected DataFrame on the screen
-st.markdown("<div style='color:white; margin-bottom:-20px;'>Descriptive statistics table of the data </div>",unsafe_allow_html=True)
-st.markdown("<div style='color:white; margin-bottom:0px;'>--------------------------------------------------</div>",unsafe_allow_html=True)
-st.dataframe(country_data.describe())
-
-# Ask the user to select its desired analysis type
 analysis_type, target_entity = st_user_select_analysis(country_geo_data['countries'],country_geo_data['continents'], country_geo_data['regions'] )
 
 # Run the analysis based on the user's selection
@@ -71,5 +58,17 @@ if analysis_type == 'correlation_matrix':
     figs = plot_interesting_correlations(country_data, matrix, 0.8)
     for fig in figs:
         st.pyplot(fig)
+
+
+# Describe each of the parameters in the API  and the descriptive statistics of the selected DataFrame on the screen
+char_exp = units_txt()
+st.markdown("<div style='color:white; margin-bottom:-20px;'>Description of the numeric variables in the data </div>",unsafe_allow_html=True)
+st.markdown("<div style='color:white; margin-bottom:0px;'>---------------------------------------------------------------</div>",unsafe_allow_html=True)
+st.dataframe(char_exp)
+
+# Print the descriptive statistics of the selected DataFrame on the screen
+st.markdown("<div style='color:white; margin-bottom:-20px;'>Descriptive statistics table of the data </div>",unsafe_allow_html=True)
+st.markdown("<div style='color:white; margin-bottom:0px;'>--------------------------------------------------</div>",unsafe_allow_html=True)
+st.dataframe(country_data.describe())
 
 # End of main code

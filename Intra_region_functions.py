@@ -95,22 +95,21 @@ def single_region_plots(df_region,region_name, log_file):
 
     # -----------Overlay plot for the distribution of gdp vs gdp_per_capita (existing plot)-------------#
     fig_gdp_gdp_capita, ax1 = plt.pyplot.subplots(figsize=(14, 7))  # Create a figure and a primary axes
-    #fig_gdp_gdp_capita, ax1 = plt.pyplot.subplots(figsize=(8, 5))  # Create a figure and a primary axes
 
     # Plot GDP on the first y-axis
-    #sns.barplot(x=df_region.index, y='gdp', data=df_region, color='skyblue', ax=ax1, label='GDP')
-    sns.barplot(x=df_region.index, y='gdp', data=df_region, color='green', ax=ax1, label='GDP')
+    df_region_sorted_gdp = df_region.sort_values('gdp', ascending=False)
+    sns.barplot(x=df_region_sorted_gdp.index, y='gdp', data=df_region_sorted_gdp, color='green', ax=ax1, label='GDP')
     ax1.set_xlabel('Country')
     ax1.set_ylabel('GDP [Millions of $]', color='green')
     ax1.tick_params(axis='y', labelcolor='green')
-    ax1.set_xticks(range(len(df_region.index)))  # Explicitly set tick locations
-    ax1.set_xticklabels(df_region.index, rotation=90, ha='right')
+    ax1.set_xticks(range(len(df_region_sorted_gdp.index)))  # Explicitly set tick locations
+    ax1.set_xticklabels(df_region_sorted_gdp.index, rotation=90, ha='right')
 
     # Create a second y-axis that shares the same x-axis
     ax2 = ax1.twinx()
 
     # Plot GDP per Capita on the second y-axis
-    sns.lineplot(x=df_region.index, y='gdp_per_capita', data=df_region, color='royalblue', marker='o', ax=ax2,
+    sns.lineplot(x=df_region_sorted_gdp.index, y='gdp_per_capita', data=df_region_sorted_gdp, color='royalblue', marker='o', ax=ax2,
                  label='GDP per Capita')
     ax2.set_ylabel('GDP per Capita [$]', color='royalblue')
     ax2.tick_params(axis='y', labelcolor='royalblue')
