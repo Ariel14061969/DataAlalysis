@@ -29,6 +29,7 @@ def inter_continent(country_data):
                 ax.set_xlabel(lb)
             else:
                 sns.barplot(data=df, x=col,  hue='Continent',ax=ax)
+            ax.legend(loc='lower left',fontsize=7,framealpha=0.3)
             if ng % 4 == 1:
                 figs.append(fig)
             ng=ng+1
