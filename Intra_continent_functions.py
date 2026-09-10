@@ -15,8 +15,9 @@ def run_intra_continent_analysis(df_continent):
     country_list = list(df_continent.index) # List of countries that are specified for the selected continent
     # Open the Intra continent analysis log file
     log_file = open('intra_continent_functions_log.txt', 'a+')
-    log_file.write(f'Log for continent {continent_name} opened at: {dt.datetime.now(zi.ZoneInfo("Asia/Jerusalem")).strftime("%Y-%m-%d %H:%M:%S")}\n')
-    log_file.write(f'#-------------------------------------------------------------------------------------------#\n')
+    log_file.write(f'Log for continent {continent_name} opened at: {dt.datetime.now(zi.ZoneInfo("Asia/Jerusalem")).strftime("%Y-%m-%d %H:%M:%S")} Jerusalm time. '
+                   f'UTC time is {dt.datetime.now(zi.ZoneInfo("UTC")).strftime("%Y-%m-%d %H:%M:%S")}\n')
+    log_file.write(f'#--------------------------------------------------------------------------------------------------------------------------------------------#\n')
     log_file.write(f'\n There are {len(country_list)} countries in the dataset of this continent:\n')
     for country in country_list:
         log_file.write(f'{country}\n')

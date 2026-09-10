@@ -15,8 +15,9 @@ def run_intra_region_analysis(df_region):
     country_list = list(df_region.index) # List of countries that are specified for the selected region
     # Open the Intra region analysis log file
     log_file = open('intra_region_functions_log.txt', 'a+')
-    log_file.write(f'Log for region {region_name} opened at: {dt.datetime.now(zi.ZoneInfo("Asia/Jerusalem")).strftime("%Y-%m-%d %H:%M:%S")}\n')
-    log_file.write(f'#-------------------------------------------------------------------------------------------#\n')
+    log_file.write(f'Log for region {region_name} opened at: {dt.datetime.now(zi.ZoneInfo("Asia/Jerusalem")).strftime("%Y-%m-%d %H:%M:%S")} Jerusalm time. '
+                   f'UTC time is {dt.datetime.now(zi.ZoneInfo("UTC")).strftime("%Y-%m-%d %H:%M:%S")}\n')
+    log_file.write(f'#--------------------------------------------------------------------------------------------------------------------------------------#\n')
     log_file.write(f'\n There are {len(country_list)} countries in the dataset of this region:\n')
     for country in country_list:
         log_file.write(f'{country}\n')

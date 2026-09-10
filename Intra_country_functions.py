@@ -14,8 +14,9 @@ from libs_and_modules import *
 def run_intra_country_analysis(country_row, country_all_columns ):
     # Open the Intra country analysis log file
     log_file = open('intra_country_functions_log.txt', 'a+')
-    log_file.write(f'Log opened at: {dt.datetime.now(zi.ZoneInfo("Asia/Jerusalem")).strftime("%Y-%m-%d %H:%M:%S")}\n')
-    log_file.write(f'#-------------------------------------------------------------------------------------------#\n')
+    log_file.write(f'Log opened at: {dt.datetime.now(zi.ZoneInfo("Asia/Jerusalem")).strftime("%Y-%m-%d %H:%M:%S")} Jerusalm time. '
+                   f'UTC time is {dt.datetime.now(zi.ZoneInfo("UTC")).strftime("%Y-%m-%d %H:%M:%S")}\n')
+    log_file.write(f'#------------------------------------------------------------------------------------------------------------#\n')
 
     # Call the analysis functions
     get_country_id_data(country_row, country_all_columns,log_file)

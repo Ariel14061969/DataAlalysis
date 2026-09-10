@@ -4,41 +4,16 @@ from libs_and_modules import *
 # Import Functions
 from import_country_data import import_country_data
 
-# -------------------------------------------------------------------------#
-# Function: validate_data_source_select                                    #
-#                                                                          #
-# Goal:     Validate the user selection of data source. While input is     #
-#           not a valid value, it clears the input and waits for a valid   #
-#           value.                                                         #
-#                                                                          #
-# Input:    None                                                           #
-#                                                                          #
-# Return:   None ( VOID )                                                  #
-#--------------------------------------------------------------------------#
-def validate_data_source_select():
-    current_input = st.session_state.data_source_select_input
-    if ((current_input.lower() != 'y') & (current_input.lower() != 'n')):
-        st.error(f"'{current_input}' is not a valid selection, please select either 'y' or 'n'. Clearing input.")
-        st.session_state.data_source_select_input = ""  # If validation fails, clear the input by setting its session_state value to an empty string
-#----------------------------------------End of Function validate_data_source_select----------------------------------------------------------------#
-
-
 # -------------------------------------------------------------------------------------------#
 # Function: st_ui_start                                                                      #
 #                                                                                            #
 # Goals:    1. Ask for user name and selecion of data source ( imported / existing )         #
 #                                                                                            #
-#           2. Validate the user selection of data source, using function                    #
-#              "validate_data_source_select"                                                 #
-#                                                                                            #
-#           3. Based on a valid user selection of the data source, it runs                   #
-#              the proper analysis and returns the clean dataframe to the                    #
-#              process that invoked it.                                                      #
-#                                                                                            #
+#           2. Based on a valid user selection of the data source, runs the proper           #
+#              analysis and returns the clean dataframe to the process that invoked it.      #                                                      #
 #                                                                                            #
 # Input:    Threshold parameter indicating the number of non empty cells relative to the     #
 #           total number of cells in a row. Used as threshold in the of dropna function      #
-#                                                                                            #
 #                                                                                            #
 # Return:   1. A clean dataframe for further data analysis                                   #
 #              ( empty cells may still exist on some columns, see item 5 below )             #
@@ -69,19 +44,37 @@ def st_ui_start(row_dropna_threshold_factor = 0.9):
         f"<span style='color: white; font-weight: bold;'>Hello, <span style='color: white; font-weight: bold;'>{name}, welcome to MyCountry</span>!",
         unsafe_allow_html=True)
 
-    if 'data_source_select_input' not in st.session_state:
-        st.session_state.data_source_select_input = ""
-
-    Import_data = st.text_input(
-        "Re-import data ? (y = re-import / n = use existing): ",
-        key='data_source_select_input',
-        on_change=validate_data_source_select,
-        autocomplete = 'off'
-    )
-
+    # Ask the user to select whether to import new data or use existing
+    import_data_options = ['','n', 'y']
+    st.markdown("<div style='color:white; margin-bottom:-20px;'>Re-import data ? (y = re-import / n = use existing):</div>",
+                unsafe_allow_html=True)
+    col_select, col_empty = st.columns([1, 8])
+    with col_select:
+        Import_data = st.selectbox('Import Data (y/n)', import_data_options, label_visibility='hidden', key='import_data_selection')
     if not Import_data:
         st.stop()
 
+    # Ask the user whether to delete log files from previous runs
+    delete_previous_log_options = ['','n', 'y']
+    st.markdown("<div style='color:white; margin-bottom:-20px;'>Delete log file ? (y = delete / n = keep):</div>",
+                unsafe_allow_html=True)
+    col_select, col_empty = st.columns([1, 8])
+    with col_select:
+        Delete_logs = st.selectbox('Delete logs (y/n)', delete_previous_log_options, label_visibility='hidden', key='delet_logs_selection')
+    if not Delete_logs:
+        st.stop()
+
+    # Clean up log files from previous runs if user selected 'y'
+    if (Delete_logs.lower() == 'y'):
+        log_file_list = ['country_data_anlyze_and_process_log.txt',
+                         'intra_country_functions_log.txt',
+                         'intra_continent_functions_log.txt',
+                         'intra_region_functions_log.txt']
+        for project_log_file in log_file_list:
+            if os.path.exists(project_log_file):
+                os.remove(project_log_file)
+
+    # Import the data based on the user selection
     if (Import_data.lower() == 'y'):
         out_filename = 'country_with_data.csv'
         st.write(f"<span style='color: white; font-weight: bold;'>Creating new database, please wait...</span>",
@@ -115,7 +108,7 @@ def st_ui_start(row_dropna_threshold_factor = 0.9):
         country_data_pre_process = country_data_orig.copy()
         country_data, country_column_data, country_columns_nan_percentage, country_geo_data  = process_new_data(country_data_pre_process, 'current', row_dropna_threshold_factor)
         return country_data, country_column_data, country_columns_nan_percentage, country_geo_data
-#-----------------------------------------------------End of Function validate_data_source_select---------------------------------------------------------------------#
+#-----------------------------------End of Function st_ui_start------------------------------------------------------------#
 
 # ---------------------------------------------------------------------------------------------------#
 # Function: process_new_data                                                                         #
@@ -276,7 +269,6 @@ def process_new_data(datain, data_import_type, row_dropna_threshold_factor = 0.9
     # Create a copy of the datain before return - no further processing will be done on the processed DataFrame inplace
     country_data_post_process = datain.copy()
     return country_data_post_process, country_column_data, country_columns_nan_percentage, country_geo_data
-
 #-----------------------------------------End of Function process_new_data-------------------------------------------------#
 
 
