@@ -2,7 +2,7 @@
 
 ## Data Analysis Project - DS24 course, BIU
 
-### Written by Ariel Robanenkp and Lior Sinay
+### Written by Ariel Rubanenko and Lior Sinay
 ### 2026/09/10
 ***
 
