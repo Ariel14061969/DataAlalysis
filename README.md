@@ -8,7 +8,9 @@
 
 ### 1. App Description
 Allows users to select either a country, continent or region and receive useful information covering economic, demographic, social, medical, 
-and environmental aspects of their selected entity. Highlights:
+and environmental aspects of their selected entity. 
+
+<u>Highlights</u>:
 
 * Based on a CSV file created from an external API.
 * Uses Streamlit to run the app on the user's localhost.
