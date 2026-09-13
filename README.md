@@ -7,12 +7,11 @@
 ***
 
 ### 1. App Description
-Allows users to select either a country, continent or region and receive useful information covering various aspects of 
-their selected entity. Highlights:
+Allows users to select either a country, continent or region and receive useful information covering economic, demographic, social, medical, 
+and environmental aspects of their selected entity. Highlights:
 
-* Uses a CSV file created from an external API.
-* Uses Streamlit to run the app on the user's localhost. 
-* Covers economic, demographic, social, medical, and environmental aspects. 
+* Based on a CSV file created from an external API.
+* Uses Streamlit to run the app on the user's localhost.
 * Data is presented in both tabular and graphical formats. 
 * Per the user's selection, either intra-entity (self) analysis or inter-entity (comparative) analysis can be applied. 
 
