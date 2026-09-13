@@ -4,7 +4,7 @@ from libs_and_modules import *
 # ---------------------------------------------------------------------------------------------------------------------#
 # Function: run_intra_continent_analysis                                                                               #
 #                                                                                                                      #
-# Goal:     A wrapper function that launches all inta continent analysis functions one by one                          #                                                                                      #
+# Goal:     A wrapper function that launches all intra continent analysis functions one by one                          #                                                                                      #
 #                                                                                                                      #
 # Input:    1. df_continent - A subset of the original dataset, containing all data for the selected continent         #
 #                                                                                                                      #
@@ -189,63 +189,29 @@ def single_continent_plots(df_continent,continent_name, log_file):
 
     # -----------------------------End of histogram and box plots for Fertility--------------------------#
 
-    # --------------------------Create Box and violin plots for employment sectors---------------------#
-    col9, col10 = st.columns([1, 1])
-    with col9:
-        df_employment_unified = df_continent[['employment_industry', 'employment_agriculture', 'employment_services',
-                                              'employment_other']].melt(var_name='Employment_Sectors',value_name='Sector_Portion')
+    # --------------------------------Create Box plot for employment sectors-----------------------------#
+    df_employment_unified = df_continent[['employment_industry', 'employment_agriculture', 'employment_services',
+                                          'employment_other']].melt(var_name='Employment_Sectors',value_name='Sector_Portion')
 
-        fig_employment_bp, ax_employment_bp = plt.pyplot.subplots(figsize=(8, 6))
-        sns.boxplot(data=df_employment_unified, x='Employment_Sectors', y='Sector_Portion', hue='Employment_Sectors',
-                    palette={'employment_industry': 'lightgrey', 'employment_agriculture': 'lightgreen',
-                             'employment_services': 'magenta','employment_other': 'gold' }, ax=ax_employment_bp, legend=False)
+    fig_employment_bp, ax_employment_bp = plt.pyplot.subplots(figsize=(14, 7))
+    sns.boxplot(data=df_employment_unified, x='Employment_Sectors', y='Sector_Portion', hue='Employment_Sectors',
+                palette={'employment_industry': 'lightgrey', 'employment_agriculture': 'lightgreen',
+                         'employment_services': 'magenta','employment_other': 'gold' }, ax=ax_employment_bp, legend=False)
 
-        ax_employment_bp.set_title(f'Portion Of Employment Sectors for countries in {continent_name}')
-        ax_employment_bp.set_xlabel('Employment Sectors')
-        ax_employment_bp.set_ylabel('Sector Portion [%]')
-        ax_employment_bp.set_xticks([0, 1, 2, 3])  # Explicitly set tick locations
-        ax_employment_bp.set_xticklabels(['employment_industry', 'employment_agriculture', 'employment_services','employment_other' ])  # Set custom x-axis labels
-        plt.pyplot.tight_layout()
-        st.pyplot(fig_employment_bp)
+    ax_employment_bp.set_title(f'Portion Of Employment Sectors for countries in {continent_name}')
+    ax_employment_bp.set_xlabel('Employment Sectors')
+    ax_employment_bp.set_ylabel('Sector Portion [%]')
+    ax_employment_bp.set_xticks([0, 1, 2, 3])  # Explicitly set tick locations
+    ax_employment_bp.set_xticklabels(['employment_industry', 'employment_agriculture', 'employment_services','employment_other' ])  # Set custom x-axis labels
+    plt.pyplot.tight_layout()
+    st.pyplot(fig_employment_bp)
 
-    with col10:
-        employment_cols_for_violin = ['employment_industry',
-                                      'employment_agriculture',
-                                      'employment_services',
-                                      'employment_other'
-                                      ]
-        df_employment_violin = df_continent[employment_cols_for_violin].melt(
-            var_name='Employment_Category', value_name='Employment_Rate')
-
-        fig_employment_violin, ax_employment_violin = plt.pyplot.subplots(figsize=(8, 6))
-        sns.violinplot(
-            x='Employment_Category', y='Employment_Rate', data=df_employment_violin,
-            hue='Employment_Category',
-            palette={
-                'employment_industry': 'lightgrey',
-                'employment_agriculture': 'lightgreen',
-                'employment_services': 'magenta',
-                'employment_other': 'gold'
-            },
-            legend=False,
-            ax=ax_employment_violin
-        )
-
-        ax_employment_violin.set_title(f'Distribution of Employment Categories in {continent_name}')
-        ax_employment_violin.set_xlabel('Employment Sectors')
-        ax_employment_violin.set_ylabel('Sector Portion [%]')
-        ax_employment_violin.set_xticks([0, 1, 2, 3])  # Explicitly set tick locations
-        ax_employment_violin.set_xticklabels(
-            ['Industry', 'Agriculture', 'Services', 'Other'], rotation=45, ha='right')
-        plt.pyplot.tight_layout()
-        st.pyplot(fig_employment_violin)
-
-    # ----------------------------End of Box and violin plots for employment sectors---------------------------#
+    # -------------------------------End of Box plot for employment sectors-----------------------------#
 
 
     # ----------------------------Create histogram and box plot for unemployment rate---------------------------------#
-    col11, col12 = st.columns([1, 1])
-    with col11:
+    col9, col10 = st.columns([1, 1])
+    with col9:
         fig_unemployment, ax_unemployment = plt.pyplot.subplots(figsize=(8, 6))
         sns.histplot(data=df_continent, x='unemployment', bins=10, ax=ax_unemployment, color='orange', kde = True)
         ax_unemployment.set_title(f'Distribution of unemployment rate for countries in {continent_name}')
@@ -254,7 +220,7 @@ def single_continent_plots(df_continent,continent_name, log_file):
         plt.pyplot.tight_layout()
         st.pyplot(fig_unemployment)
 
-    with col12:
+    with col10:
         fig_unemployment_bp, ax_unemployment_bp = plt.pyplot.subplots(figsize=(8, 6))
         sns.boxplot(data=df_continent, x='Continent', y='unemployment', ax=ax_unemployment_bp, color='orange')
         ax_unemployment_bp.set_title(f'Unemployment rate for countries in {continent_name}, a boxplot representation')
@@ -266,8 +232,8 @@ def single_continent_plots(df_continent,continent_name, log_file):
     # ----------------------------End of histogram and box plot for unemployment---------------------------- #
 
     # ----------------------------Create histogram and box plot for sex ratio---------------------------------#
-    col13, col14 = st.columns([1, 1])
-    with col13:
+    col11, col12 = st.columns([1, 1])
+    with col11:
         fig_sex_ratio, ax_sex_ratio = plt.pyplot.subplots(figsize=(8, 6))
         sns.histplot(data=df_continent, x='sex_ratio', bins=10, ax=ax_sex_ratio, color='lightsalmon', kde = True)
         ax_sex_ratio.set_title(f'Distribution of sex ratio for countries in {continent_name}')
@@ -276,7 +242,7 @@ def single_continent_plots(df_continent,continent_name, log_file):
         plt.pyplot.tight_layout()
         st.pyplot(fig_sex_ratio)
 
-    with col14:
+    with col12:
         fig_sex_ratio_bp, ax_sex_ratio_bp = plt.pyplot.subplots(figsize=(8, 6))
         sns.boxplot(data=df_continent, x='Continent', y='sex_ratio', ax=ax_sex_ratio_bp, color='lightsalmon')
         ax_sex_ratio_bp.set_title(f'Distribution of sex ratio for countries in {continent_name}, a boxplot representation')
@@ -287,32 +253,9 @@ def single_continent_plots(df_continent,continent_name, log_file):
 
     # ----------------------------End of histogram and box plot for sex ratio---------------------------- #
 
-    # --------------------------Create Box and violin plots for school enrollment--------------------------#
-    col15, col16 = st.columns([1, 1])
-    with col15:
-        df_school_enrollment_unified_box = df_continent[['primary_school_enrollment_female', 'primary_school_enrollment_male',
-        'secondary_school_enrollment_female', 'secondary_school_enrollment_male',
-        'post_secondary_enrollment_female', 'post_secondary_enrollment_male']].melt(var_name='Enrollment_Type',
-                                                                        value_name='Enrollment_Rate')
-
-        fig_school_enrollment_bp, ax_school_enrollment_bp = plt.pyplot.subplots(figsize=(8, 6))
-        sns.boxplot(data=df_school_enrollment_unified_box, x='Enrollment_Type', y='Enrollment_Rate', hue='Enrollment_Type',
-                    palette={'primary_school_enrollment_female': 'royalblue', 'primary_school_enrollment_male': 'yellow',
-                             'secondary_school_enrollment_female': 'blue', 'secondary_school_enrollment_male': 'orange',
-                             'post_secondary_enrollment_female': 'purple', 'post_secondary_enrollment_male': 'red'},
-                    ax=ax_school_enrollment_bp,legend=False)
-
-        ax_school_enrollment_bp.set_title(f'School enrollment distribution by gender for countries in {continent_name}')
-        ax_school_enrollment_bp.set_xlabel('Enrollment Type')
-        ax_school_enrollment_bp.set_ylabel('Enrollment Rate [%]')
-        ax_school_enrollment_bp.set_xticks([0, 1, 2, 3, 4, 5])
-        ax_school_enrollment_bp.set_xticklabels(['primary_school_female', 'primary_school_male',
-                                                 'secondary_school_female','secondary_school_male',
-                                                 'post_secondary_female', 'post_secondary_male'], rotation = 45)
-        plt.pyplot.tight_layout()
-        st.pyplot(fig_school_enrollment_bp)
-
-    with col16:
+    # --------------------Create violin plots for school enrollment and life expectancy-------------------#
+    col13, col14 = st.columns([1, 1])
+    with col13:
     # Violin plot for school enrollment by gender
         enrollment_cols = [
             'primary_school_enrollment_female', 'primary_school_enrollment_male',
@@ -331,7 +274,7 @@ def single_continent_plots(df_continent,continent_name, log_file):
             lambda x: 'Female' if 'female' in x else 'Male')
 
     # Create the violin plot
-        fig_enrollment, ax_enrollment = plt.pyplot.subplots(figsize=(8, 6))  # Increased height for labels
+        fig_enrollment, ax_enrollment = plt.pyplot.subplots(figsize=(8, 6))
         sns.violinplot(x='Enrollment_Type', y='Enrollment_Value', hue='Gender', data=df_school_enrollment_unified_violin, split=True,
                        ax=ax_enrollment, palette={'Female': 'magenta', 'Male': 'orange'})
 
@@ -340,18 +283,18 @@ def single_continent_plots(df_continent,continent_name, log_file):
         ax_enrollment.set_ylabel('Enrollment Rate [%]')
         ax_enrollment.legend(title='Gender')
 
-        # Define custom labels
+    # Define custom labels
         custom_labels = [
             'primary_school',
             'secondary_school',
             'post_secondary'
         ]
 
-        # Remove x-ticks
+    # Remove x-ticks
         ax_enrollment.set_xticks([])
 
-        # Add a single custom label for 'primary school enrollment'
-        # The x-position for the first category is 0.
+    # Add a single custom label for 'primary school enrollment'
+    # The x-position for the first category is 0.
         y_axes_offset = -0.01
         ax_enrollment.text(0.5, y_axes_offset, 'primary_school', ha='center', va='top',
                            transform=ax_enrollment.get_xaxis_transform())
@@ -360,7 +303,7 @@ def single_continent_plots(df_continent,continent_name, log_file):
         ax_enrollment.text(4.5, y_axes_offset, 'post_secondary', ha='center', va='top',
                            transform=ax_enrollment.get_xaxis_transform())
 
-        # Add vertical lines between categories
+    # Add vertical lines between categories
         num_categories = len(df_school_enrollment_unified_violin['Enrollment_Type'].unique())
         for i in range(num_categories - 1):
             ax_enrollment.axvline(x=i + 0.5, color='gray', linestyle='--', linewidth=0.8)
@@ -368,46 +311,24 @@ def single_continent_plots(df_continent,continent_name, log_file):
         plt.pyplot.tight_layout()
         st.pyplot(fig_enrollment)
 
-    # ----------------------------End of Box and violin plots for school enrollment--------------------------#
 
-    # ----------------------------Create Box and violin plots for life expectancy----------------------------#
-    col17, col18 = st.columns([1, 1])
-    with col17:
-        df_life_expectancy_unified_box = df_continent[
-            ['life_expectancy_female', 'life_expectancy_male']].melt(var_name='Gender',
-                                                                     value_name='Value')
-
-        fig_life_expectancy_bp, ax_life_expectancy_bp = plt.pyplot.subplots(figsize=(8, 6))
-        sns.boxplot(data=df_life_expectancy_unified_box, x='Gender', y='Value', hue='Gender',
-                    palette={'life_expectancy_female': 'royalblue',
-                             'life_expectancy_male': 'orange'},
-                    ax=ax_life_expectancy_bp, legend=False)
-
-        ax_life_expectancy_bp.set_title(f'Life expectancy distribution by gender for countries in {continent_name}')
-        ax_life_expectancy_bp.set_xlabel('Gender')
-        ax_life_expectancy_bp.set_ylabel('Expectancy [Years]')
-        ax_life_expectancy_bp.set_xticks([0, 1])
-        ax_life_expectancy_bp.set_xticklabels(['Female', 'Male'])
-        plt.pyplot.tight_layout()
-        st.pyplot(fig_life_expectancy_bp)
-
-    # Violin plot for life expectancy by gender
-    with col18:
+    # Start Violin plot for life expectancy per gender
+    with col14:
         life_expectancy_cols = ['life_expectancy_female', 'life_expectancy_male']
         df_life_expectancy = df_continent[life_expectancy_cols].copy()
 
-        # Melt the DataFrame to long format for violin plot
+    # Melt the DataFrame to long format for violin plot
         df_life_expectancy_unified_violin = df_life_expectancy.melt(var_name='Life_Expectancy_Gender',
                                                                     value_name='Life_Expectancy_Value')
 
-        # Create a 'Population' category for the x-axis
+    # Create a 'Population' category for the x-axis
         df_life_expectancy_unified_violin['Category'] = 'Population'
 
-        # Extract 'Gender' from 'Life_Expectancy_Gender'
+    # Extract 'Gender' from 'Life_Expectancy_Gender'
         df_life_expectancy_unified_violin['Gender'] = df_life_expectancy_unified_violin['Life_Expectancy_Gender'].apply(
             lambda x: 'Female' if 'female' in x else 'Male')
 
-        # Create the violin plot
+    # Create the violin plot
         fig_life_expectancy, ax_life_expectancy = plt.pyplot.subplots(figsize=(8, 6))
         sns.violinplot(x='Category', y='Life_Expectancy_Value', hue='Gender', data=df_life_expectancy_unified_violin,
                        split=True, ax=ax_life_expectancy, palette={'Female': 'magenta', 'Male': 'orange'})
@@ -419,7 +340,7 @@ def single_continent_plots(df_continent,continent_name, log_file):
 
         plt.pyplot.tight_layout()
         st.pyplot(fig_life_expectancy)
-    # ----------------------------End of box and Violin plots for life expectancy by gender---------------------------#
+    # ----------------  End of Violin plots for school enrollment and life expectancy by gender-----------------------#
 
     # -----------------------------Create histogram and box plot for Infant Mortality---------------------------------#
     col19, col20 = st.columns([1, 1])
